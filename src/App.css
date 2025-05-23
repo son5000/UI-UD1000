@@ -1,38 +1,191 @@
-.App {
-  text-align: center;
-}
+@import "./reset.css";
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.container {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  justify-content: space-around;
+  margin-top: 200px;
 }
 
-.App-link {
-  color: #61dafb;
+.container > div {
+  width: 800px;
+  height: 480px;
+  position: relative;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.popupGuide {
+  position: absolute;
+  top: 80px;
+  border-radius: 8px;
+  right: 200px;
+  background-color: #424242af;
+  padding: 15px;
+  > p {
+    line-height: 30px;
+    margin-left: 30px;
+    position: relative;
+    color: white;
+    text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
+      1px 1px 0 black;
+    &:nth-of-type(1)::after {
+      content: "";
+      width: 20px;
+      height: 25px;
+      background: url(../public/images/btn상하.png) no-repeat center / contain;
+      display: block;
+      position: absolute;
+      left: -30px;
+      top: 0;
+    }
+    &:nth-of-type(2)::after {
+      content: "";
+      width: 25px;
+      height: 30px;
+      background: url(../public/images/btn좌우.png) no-repeat center / contain;
+      display: block;
+      position: absolute;
+      left: -32px;
+      top: 0;
+    }
   }
-  to {
-    transform: rotate(360deg);
+  span {
+    font-size: 11px;
+    color: white;
+    text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
+      1px 1px 0 black;
   }
+  .count10 {
+    display: inline-block;
+    width: 15px;
+    text-align: center;
+  }
+}
+
+.focus {
+  position: absolute;
+  left: 40%;
+  top: 55%;
+  transform: translate(-50%, -50%);
+  &::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    background-color: red;
+    display: block;
+    position: absolute;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    top: 50%;
+    border-radius: 8px;
+    border: 1px solid black;
+  }
+  strong {
+    font-size: 30px;
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    transform: translate(-50%, -50%);
+    text-shadow: -2px -2px 0 black, 2px -2px 2px black, -2px 2px 0 black,
+      2px 2px 0 black;
+    color: white;
+  }
+}
+
+.donut {
+  border: 3px dashed rgb(110, 250, 17);
+  position: relative;
+  width: var(--donut-size);
+  height: var(--donut-size);
+  border-radius: 50%;
+  overflow: hidden;
+  clip-path: inset(0 0 50% 0); /* 반원 자르기 */
+  -webkit-mask: radial-gradient(
+    circle var(--inner-radius) at center,
+    transparent 0 var(--inner-radius),
+    black calc(var(--inner-radius) + 1px)
+  );
+  mask: radial-gradient(
+    circle var(--inner-radius) at center,
+    transparent 0 var(--inner-radius),
+    black calc(var(--inner-radius) + 1px)
+  );
+}
+
+/* 게이지 배경은 따로 돌림 */
+.donut::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--donut-color) 0deg calc(var(--percent) * 1.8deg),
+    var(--donut-bg) calc(var(--percent) * 1.8deg) 180deg
+  );
+  transform: rotate(-90deg); /* ✅ 배경만 회전 */
+}
+
+.WarningOutlineBox {
+  width: 615px;
+  height: 422px;
+  position: absolute;
+  background-color: rgb(255, 0, 0);
+  top: 57px;
+  box-shadow: inset 0px 0px 20px rgb(255, 0, 0);
+  background-color: transparent;
+}
+
+.valueOverlay {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  > li {
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 8px;
+    > span {
+      padding-block: 2px;
+      background: #000000;
+      background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.81) 1%,
+        rgba(133, 133, 133, 0.7) 88%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      font-size: 14px;
+      color: white;
+      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
+        1px 1px 0 black;
+      width: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 2px;
+      > img {
+        width: 20px;
+      }
+    }
+    > strong {
+      font-size: 36px;
+      color: yellow;
+      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
+        1px 1px 0 black;
+    }
+    > p {
+      color: rgb(111, 157, 227);
+      font-weight: 600;
+      font-size: 16px;
+      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
+        1px 1px 0 black;
+    }
+  }
+}
+
+.currentMode {
+  position: absolute;
+  left: 2px;
+  bottom: 155px;
+  width: 43px;
 }
