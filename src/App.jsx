@@ -47,7 +47,7 @@ function App() {
           <ValueOverlay />
           <CurrentMode />
         </div>
-        <img src="/images/주요변경항목 정리.png" alt="" />
+        <img src="/images/주요변경항목정리.png" alt="" />
       </div>
     </div>
   );
