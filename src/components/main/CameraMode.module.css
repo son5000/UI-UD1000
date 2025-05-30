@@ -1,0 +1,38 @@
+.cameraMode {
+  position: absolute;
+  right: 110px;
+  bottom: 10px;
+  background-color: rgba(255, 255, 255, 0.63);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.arrow {
+  cursor: pointer;
+  position: absolute;
+  background-color: white;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100%;
+  box-sizing: border-box;
+  border: 1px solid black;
+  z-index: 1;
+  img {
+    width: 100%;
+  }
+}
+
+.nextBtn {
+  left: 4px;
+  top: 7px;
+  transform: rotate(90deg);
+}
+
+.prevBtn {
+  left: 4px;
+  top: 35px;
+  transform: rotate(90deg);
+}

@@ -1,0 +1,61 @@
+.container {
+  width: 90px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.63);
+  position: absolute;
+  bottom: 10px;
+  left: 7px;
+  border-radius: 8px;
+}
+
+.frequencyRange {
+  bottom: 10px;
+  left: 25px;
+}
+
+.boxStyle {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.boxStyle img {
+  width: 50px;
+}
+.slick-slide > div {
+  /* padding: 0 50px; ✅ 슬라이드 간 좌우 간격 */
+}
+
+.arrow {
+  cursor: pointer;
+  position: absolute;
+  background-color: white;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 100%;
+  box-sizing: border-box;
+  border: 1px solid black;
+  top: 50%;
+  img {
+    width: 100%;
+  }
+  transform: translateY(-50%);
+}
+
+.nextBtn {
+  right: 3px;
+}
+
+.prevBtn {
+  left: 3px;
+}

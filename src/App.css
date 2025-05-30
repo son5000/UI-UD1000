@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: space-around;
-  margin-top: 200px;
+  margin-block: 200px;
 }
 
 .container > div {
@@ -15,9 +15,9 @@
 
 .popupGuide {
   position: absolute;
-  top: 80px;
+  top: 63px;
   border-radius: 8px;
-  right: 200px;
+  right: 110px;
   background-color: #424242af;
   padding: 15px;
   > p {
@@ -61,131 +61,237 @@
   }
 }
 
-.focus {
-  position: absolute;
-  left: 40%;
-  top: 55%;
-  transform: translate(-50%, -50%);
-  &::after {
-    content: "";
-    width: 8px;
-    height: 8px;
-    background-color: red;
-    display: block;
-    position: absolute;
-    transform: translate(-50%, -50%);
-    left: 50%;
-    top: 50%;
-    border-radius: 8px;
-    border: 1px solid black;
-  }
-  strong {
-    font-size: 30px;
-    position: absolute;
-    left: 50%;
-    top: 100%;
-    transform: translate(-50%, -50%);
-    text-shadow: -2px -2px 0 black, 2px -2px 2px black, -2px 2px 0 black,
-      2px 2px 0 black;
-    color: white;
-  }
-}
-
-.donut {
-  border: 3px dashed rgb(110, 250, 17);
-  position: relative;
-  width: var(--donut-size);
-  height: var(--donut-size);
-  border-radius: 50%;
-  overflow: hidden;
-  clip-path: inset(0 0 50% 0); /* 반원 자르기 */
-  -webkit-mask: radial-gradient(
-    circle var(--inner-radius) at center,
-    transparent 0 var(--inner-radius),
-    black calc(var(--inner-radius) + 1px)
-  );
-  mask: radial-gradient(
-    circle var(--inner-radius) at center,
-    transparent 0 var(--inner-radius),
-    black calc(var(--inner-radius) + 1px)
-  );
-}
-
-/* 게이지 배경은 따로 돌림 */
-.donut::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: conic-gradient(
-    var(--donut-color) 0deg calc(var(--percent) * 1.8deg),
-    var(--donut-bg) calc(var(--percent) * 1.8deg) 180deg
-  );
-  transform: rotate(-90deg); /* ✅ 배경만 회전 */
-}
-
 .WarningOutlineBox {
-  width: 615px;
-  height: 422px;
+  width: 696px;
+  height: 421px;
   position: absolute;
   background-color: rgb(255, 0, 0);
-  top: 57px;
-  box-shadow: inset 0px 0px 20px rgb(255, 0, 0);
+  top: 59px;
+  box-shadow: inset 0px 0px 8px rgb(255, 0, 0);
   background-color: transparent;
-}
-
-.valueOverlay {
-  position: absolute;
-  bottom: 5px;
-  left: 5px;
-  > li {
-    display: flex;
-    align-items: flex-end;
-    margin-bottom: 8px;
-    > span {
-      padding-block: 2px;
-      background: #000000;
-      background: linear-gradient(
-        90deg,
-        rgba(0, 0, 0, 0.81) 1%,
-        rgba(133, 133, 133, 0.7) 88%,
-        rgba(255, 255, 255, 0) 100%
-      );
-      font-size: 14px;
-      color: white;
-      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
-        1px 1px 0 black;
-      width: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      padding-left: 2px;
-      > img {
-        width: 20px;
-      }
-    }
-    > strong {
-      font-size: 36px;
-      color: yellow;
-      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
-        1px 1px 0 black;
-    }
-    > p {
-      color: rgb(111, 157, 227);
-      font-weight: 600;
-      font-size: 16px;
-      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
-        1px 1px 0 black;
-    }
-  }
 }
 
 .currentMode {
   position: absolute;
-  left: 2px;
-  bottom: 155px;
-  width: 43px;
+  left: 30px;
+  bottom: 5px;
+  > img {
+    width: 43px;
+  }
+}
+
+.scope {
+  width: 71px;
+  height: 71px;
+  background-color: transparent;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  left: 44%;
+  background: url(../public/images/scope6.png) no-repeat center / cover;
+  top: 53%;
+}
+
+.gauge {
+  position: absolute;
+  padding: 1px;
+  left: 44%;
+  top: 90%;
+  border-radius: 100%;
+  transform: translate(-50%, -50%);
+  strong {
+    font-size: 50px;
+    position: absolute;
+    left: 51%;
+    top: 48%;
+    transform: translate(-50%, -50%);
+    text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
+      1px 1px 0 black;
+
+    > span {
+      font-size: 14px;
+      color: #ffdd33;
+    }
+  }
+  b {
+    position: absolute;
+    bottom: 83px;
+    left: 50px;
+    font-size: 12px;
+    text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
+      1px 1px 0 black;
+    color: #ffffff;
+    > span {
+      color: #ffdd33;
+      font-size: 8px;
+    }
+  }
+}
+
+/* 형광색 네온 (시안/청록 계열) */
+.neon1 {
+  font-size: 60px;
+  font-weight: 700;
+  color: #ebebeb;
+  animation: neon-flicker1 0.5s infinite alternate;
+}
+
+/* 노란색 네온 */
+.neon2 {
+  font-size: 60px;
+  font-weight: 700;
+  color: #ebebeb;
+  animation: neon-flicker2 0.5s infinite alternate;
+}
+
+/* 빨간색 네온 */
+.neon3 {
+  font-size: 60px;
+  font-weight: 700;
+  color: #ebebeb;
+  animation: neon-flicker3 0.5s infinite alternate;
+}
+
+.neon4 {
+  font-size: 60px;
+  font-weight: 700;
+  color: #ebebeb;
+  animation: neon-flicker4 0.5s infinite alternate;
+}
+
+@keyframes neon-flicker1 {
+  0% {
+    text-shadow: 0 0 8px rgba(57, 255, 20, 0.8), 0 0 10px rgba(57, 255, 20, 0.8),
+      0 0 8px rgba(57, 255, 20, 0.8);
+  }
+  100% {
+    text-shadow: 0 0 10px rgba(57, 255, 20, 0.8),
+      0 0 10px rgba(57, 255, 20, 0.8), 0 0 10px rgba(57, 255, 20, 0.8);
+  }
+}
+
+@keyframes neon-flicker2 {
+  0% {
+    text-shadow: 0 0 7px rgba(255, 174, 0, 0.7), 0 0 10px rgba(255, 174, 0, 0.7),
+      0 0 7px rgba(255, 174, 0, 0.7);
+  }
+  100% {
+    text-shadow: 0 0 9px rgba(255, 174, 0, 0.7), 0 0 9px rgba(255, 174, 0, 0.7),
+      0 0 9px rgba(255, 174, 0, 0.7);
+  }
+}
+
+@keyframes neon-flicker3 {
+  0% {
+    text-shadow: 0 0 8px rgba(252, 38, 38, 0.8), 0 0 10px rgba(252, 38, 38, 0.8),
+      0 0 7px rgba(252, 38, 38, 0.8);
+  }
+  100% {
+    text-shadow: 0 0 10px rgba(252, 38, 38, 0.8),
+      0 0 10px rgba(252, 38, 38, 0.8), 0 0 10px rgba(252, 38, 38, 0.8);
+  }
+}
+
+@keyframes neon-flicker4 {
+  0% {
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 0, 0, 0.8),
+      0 0 7px rgba(0, 0, 0, 0.8);
+  }
+  100% {
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 10px rgba(0, 0, 0, 0.8),
+      0 0 10px rgba(0, 0, 0, 0.8);
+  }
+}
+
+.valueList {
+  position: absolute;
+  left: 20px;
+  top: 65px;
+
+  .item {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    position: relative;
+    margin-bottom: 8px;
+    color: #000000; /* 텍스트 색상: 검정 */
+    text-shadow: -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white,
+      1px 1px 0 white; /* 외곽선 색상: 흰색 */
+
+    p {
+      position: absolute;
+      left: 55%;
+      top: 55%;
+      font-size: 22px;
+      transform: translate(-50%, -50%);
+      > span {
+        font-size: 9px;
+        font-family: "Quantico", sans-serif;
+      }
+    }
+    &::after {
+      content: "";
+      width: 25px;
+      height: 25px;
+      display: flex;
+      position: absolute;
+      left: -5px;
+      top: 0px;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 500;
+      z-index: 999;
+      text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black,
+        1px 1px 0 black;
+      color: #ffffff;
+    }
+    &:nth-of-type(1) {
+      /* color: #ffdd33; */
+    }
+    &:nth-of-type(2) {
+      /* color: rgb(247, 126, 14); */
+    }
+    &:nth-of-type(1)::after {
+      content: "Avg";
+      color: white;
+      font-family: "Orbitron", sans-serif;
+      font-size: 9px;
+    }
+    &:nth-of-type(2)::after {
+      content: "Peak";
+      color: white;
+      font-family: "Orbitron", sans-serif;
+      font-size: 9px;
+    }
+    &:nth-of-type(3)::after {
+      content: "";
+      background: url(../public/images/폭.png) no-repeat center / contain;
+    }
+    &:nth-of-type(4)::after {
+      background: url(../public/images/온도.png) no-repeat center / contain;
+    }
+    &:nth-of-type(5)::after {
+      background: url(../public/images/습도.png) no-repeat center / contain;
+    }
+  }
+
+  .itemBg {
+    width: 100%;
+    height: 100%;
+    font-weight: 600;
+    background: conic-gradient(
+      rgb(255, 255, 255) 0deg,
+      rgb(227, 227, 227) 45deg,
+      rgb(181, 180, 180) 90deg,
+      rgb(152, 151, 151) 135deg,
+      rgb(115, 115, 115) 180deg,
+      rgb(81, 80, 80) 225deg,
+      rgb(34, 34, 34) 265deg,
+      rgb(255, 255, 255) 360deg
+    );
+    border-radius: 50%;
+
+    /* 중심 구멍 마스크 */
+    mask: radial-gradient(circle 36px at center, transparent 18px, black 28px);
+  }
 }

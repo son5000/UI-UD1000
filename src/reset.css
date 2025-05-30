@@ -118,13 +118,51 @@ input {
 #root {
   background-color: var(--color--black);
 }
+/* ✅ 구글 폰트 불러오기  */
 
-/* 폰트 CDN */
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap");
+
+/* ✅ 커스텀 폰트 - Digital-7 (파일 경로는 public 기준) */
 @font-face {
-  font-family: "SUIT-Regular";
-  src: url("https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Regular.woff2")
-    format("woff2");
+  font-family: "Digital-7";
+  src: url("../public/fonts/digital-7.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ✅ 폰트 클래스 정의 */
+.font-suit {
+  font-family: "SUIT-Regular", sans-serif;
+}
+
+.font-roboto {
+  font-family: "Roboto", sans-serif;
+}
+.font-orbitron {
+  font-family: "Orbitron", sans-serif;
+}
+
+.font-quantico {
+  font-family: "Quantico", sans-serif;
+}
+
+.font-bebas {
+  font-family: "Bebas Neue", sans-serif;
+}
+
+.font-rajdhani {
+  font-family: "Rajdhani", sans-serif;
+}
+.font-digital7 {
+  font-family: "Digital-7", monospace;
 }
