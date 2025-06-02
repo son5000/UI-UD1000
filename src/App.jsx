@@ -7,6 +7,8 @@ import FrequencyRange from "./components/main/FrequencyRange";
 import CameraMode from "./components/main/CameraMode";
 import WarningOutline from "./components/main/WarningOutline";
 import ValueList from "./components/main/ValueList";
+import Clock from "./components/Clock";
+import Thumbnail from "./components/main/Thumbnail";
 
 function App() {
   const [currentdB, setCurrentdB] = useState(0);
@@ -38,6 +40,11 @@ function App() {
       <div className="container">
         <div>
           <img src="/images/화면설계 샘플이미지.png" alt="" />
+          <div className="systemPanel">
+            <img src="/images/설정.png" alt="" />
+            <Clock />
+            <img src="/images/와이파이배터리.png" alt="" />
+          </div>
           {popupOpen && <PopupGuide setPopupOpen={setPopupOpen} />}
           <Scope />
           <Gauge currentdB={currentdB} />
@@ -45,6 +52,7 @@ function App() {
           <FrequencyRange />
           <CameraMode />
           <ValueList />
+          <Thumbnail />
         </div>
       </div>
     </div>

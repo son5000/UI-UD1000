@@ -2,12 +2,7 @@
 import { useEffect, useRef } from "react";
 
 // ArcSlider 컴포넌트 정의
-export default function ArcSlider({
-  sliders,
-  width = 250,
-  height = 250,
-  currentdb,
-}) {
+export default function ArcSlider({ sliders, width = 250, height = 250 }) {
   const containerRef = useRef(null); // SVG를 렌더링할 DOM 참조를 위한 ref 생성
 
   useEffect(() => {
@@ -19,10 +14,9 @@ export default function ArcSlider({
     const tau = 2 * Math.PI; // 원 둘레(2π), 360도 표현용
 
     // 기본 arc 스타일 값들 정의
-    const defaultArcFractionSpacingRatio = 0.9; // arc 간격 비율 기본값
-    const defaultArcFractionLength = 1.8; // arc 조각 길이 기본값
-    const defaultArcFractionThickness = 15; // arc 두께 기본값
-    const defaultArcBgFractionColor = "#ffdd33"; // 배경 arc 색상 기본값
+    const defaultArcFractionSpacingRatio = 0.45; // arc 간격 비율 기본값
+    const defaultArcFractionLength = 3; // arc 조각 길이 기본값
+    const defaultArcFractionThickness = 18; // arc 두께 기본값
 
     // arc 간격 계산 함수
     const calculateSpacing = (circumference, length, ratio) => {
@@ -71,24 +65,22 @@ export default function ArcSlider({
     sliders.forEach((slider, i) => {
       // 슬라이더 속성 분해 및 기본값 지정
       const {
-        radius = 50,
-        min = 0,
-        max = 30,
-        step = 50,
-        initialValue = 0,
-        color = "",
-        backgroundAngle = 270,
-        valueAngle = 270,
-        arcFractionSpacingRatio,
-        arcFractionLength,
-        arcFractionThickness,
-        arcBgFractionColor,
+        radius = 50, //게이지 반지름
+        min = 0, //최소값
+        max = 30, //최대값
+        step = 1, // 값 증가 단위
+        initialValue = 0, // 값
+        valueColor = "", // 값 색상
+        backgroundAngle = 270, // 배경아크 각도
+        arcFractionSpacingRatio, // 아크 조각 간 간격 비율
+        arcFractionLength, // 조각 가로 길이
+        arcFractionThickness, // 조각 세로 길이
+        arcBgFractionColor, // 아크 배경 색
       } = slider;
+
       const addGlowFilter = (svg) => {
         if (svg.querySelector("#glow")) return;
-
         const ns = "http://www.w3.org/2000/svg";
-
         const defs = document.createElementNS(ns, "defs");
         const filter = document.createElementNS(ns, "filter");
         filter.setAttribute("id", "glow");
@@ -99,7 +91,7 @@ export default function ArcSlider({
         filter.setAttribute("filterUnits", "userSpaceOnUse");
 
         const gaussianBlur = document.createElementNS(ns, "feGaussianBlur");
-        gaussianBlur.setAttribute("stdDeviation", "1.8"); // 블러가 퍼지는 정도
+        gaussianBlur.setAttribute("stdDeviation", "1.9"); // 블러가 퍼지는 정도
         gaussianBlur.setAttribute("result", "blur");
 
         const colorMatrix = document.createElementNS(ns, "feColorMatrix");
@@ -108,9 +100,9 @@ export default function ArcSlider({
         colorMatrix.setAttribute(
           "values",
           `1 0 0 0 0
-     0 1 0 0 0
-     0 0 1 0 0
-     0 0 0 1.4 0` // 블러 강도 조절
+           0 1 0 0 0
+           0 0 1 0 0
+           0 0 0 1.6 0` // 블러 강도 조절
         );
         colorMatrix.setAttribute("result", "coloredBlur");
 
@@ -118,13 +110,10 @@ export default function ArcSlider({
         const mergeNode1 = document.createElementNS(ns, "feMergeNode");
         mergeNode1.setAttribute("in", "coloredBlur"); // 강조된 blur
         const mergeNode2 = document.createElementNS(ns, "feMergeNode");
-        mergeNode2.setAttribute("in", "coloredBlur"); // 중복 강조
-        const mergeNode3 = document.createElementNS(ns, "feMergeNode");
-        mergeNode3.setAttribute("in", "SourceGraphic"); // 원본 그래픽
+        mergeNode2.setAttribute("in", "SourceGraphic"); // 원본 그래픽
 
         merge.appendChild(mergeNode1);
         merge.appendChild(mergeNode2);
-        merge.appendChild(mergeNode3);
 
         filter.appendChild(gaussianBlur);
         filter.appendChild(colorMatrix);
@@ -140,11 +129,11 @@ export default function ArcSlider({
         svg,
         radius,
         angle,
-        color,
+        valueColor,
         spacingRatio = defaultArcFractionSpacingRatio,
         length = defaultArcFractionLength,
         thickness = defaultArcFractionThickness,
-        isActive = false
+        isActive = true
       ) => {
         const path = document.createElementNS(
           "http://www.w3.org/2000/svg",
@@ -154,17 +143,12 @@ export default function ArcSlider({
 
         path.setAttribute("d", describeArc(cx, cy, radius, 0, angle));
         path.setAttribute("fill", "none");
-        path.setAttribute("stroke", color);
+        path.setAttribute("stroke", valueColor);
         path.setAttribute("stroke-width", thickness);
         path.setAttribute("stroke-dasharray", `${length} ${spacing}`);
-
-        if (!isActive) {
+        if (isActive) {
           path.setAttribute("filter", "url(#glow)");
         }
-
-        path.classList.add(
-          isActive ? "sliderSinglePathActive" : "sliderSinglePath"
-        );
         svg.appendChild(path);
       };
 
@@ -175,7 +159,7 @@ export default function ArcSlider({
         handleColor,
         strokeColor = "#ffffff",
         strokeThickness = 1,
-        type = "line" // "line", "dot", "triangle"
+        type = "triangle" // "line", "dot", "triangle"
       ) => {
         addGlowFilter(svg);
         const rad = (angle * tau) / 360;
@@ -202,7 +186,7 @@ export default function ArcSlider({
           triangle.setAttribute("stroke", strokeColor);
           triangle.setAttribute("stroke-width", strokeThickness);
           triangle.setAttribute("transform", `rotate(-30,${x1},${y1})`);
-          // triangle.setAttribute("filter", "url(#glow)");
+          triangle.setAttribute("filter", "url(#glow)");
           svg.appendChild(triangle);
         } else {
           const lineLength = 20;
@@ -233,7 +217,7 @@ export default function ArcSlider({
           line.setAttribute("y2", y2);
           line.setAttribute("stroke", handleColor);
           line.setAttribute("stroke-width", 3);
-          // line.setAttribute("filter", "url(#glow)");
+          line.setAttribute("filter", "url(#glow)");
           svg.appendChild(line);
         }
       };
@@ -245,7 +229,7 @@ export default function ArcSlider({
       const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
 
       // 그룹 회전 설정 (i에 따라 다름)
-      if (i === 2 || i === 6) {
+      if (i === 1) {
         group.setAttribute("transform", `rotate(-100,${cx},${cy})`);
       } else {
         group.setAttribute("transform", `rotate(-135,${cx},${cy})`);
@@ -258,13 +242,11 @@ export default function ArcSlider({
         group,
         radius,
         backgroundAngle,
-        i === 0 || i === 2
-          ? arcBgFractionColor ?? defaultArcBgFractionColor
-          : "transparent",
+        arcBgFractionColor,
         arcFractionSpacingRatio,
         arcFractionLength,
         arcFractionThickness,
-        i < 4 ? true : false
+        false
       );
 
       // 현재 값 arc 그리기
@@ -272,26 +254,26 @@ export default function ArcSlider({
         group,
         radius,
         initialAngle,
-        color,
+        valueColor,
         arcFractionSpacingRatio,
         arcFractionLength,
         arcFractionThickness,
-        i < 4 ? true : false
+        true
       );
 
-      // if (i !== 0 && i !== 2 && i !== 4 && i !== 6) {
-      //   const handleType = i === 1 || i === 5 ? "line" : "triangle"; // i==1 → 선, i==3 → 삼각형
-
-      //   drawHandle(
-      //     group,
-      //     radius,
-      //     initialAngle,
-      //     slider.handleFillColor,
-      //     slider.strokeColor ?? "#ffffff",
-      //     slider.strokeThickness,
-      //     handleType // <- 새로 추가된 인자
-      //   );
-      // }
+      // Max 요소만 핸들표시 O
+      if (i === 2) {
+        const handleType = "triangle"; // max = triangle, avg = line
+        drawHandle(
+          group,
+          radius,
+          initialAngle,
+          slider.handleFillColor,
+          slider.strokeColor ?? "#ffffff",
+          slider.strokeThickness,
+          handleType // <- 새로 추가된 인자
+        );
+      }
     });
   }, [sliders, width, height]); // 슬라이더나 사이즈가 바뀔 때마다 재실행
 
