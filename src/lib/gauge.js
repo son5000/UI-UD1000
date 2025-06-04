@@ -2,8 +2,61 @@
 import { useEffect, useRef } from "react";
 
 // ArcSlider 컴포넌트 정의
-export default function ArcSlider({ sliders, width = 250, height = 250 }) {
+export default function ArcSlider({ currentdB, width = 150, height = 150 }) {
   const containerRef = useRef(null); // SVG를 렌더링할 DOM 참조를 위한 ref 생성
+
+  const sliders = [
+    {
+      // ✅ 공통: 값 범위 및 초기값
+      radius: 50, // 게이지 반지름
+      min: 0, // 최소값
+      max: 30, // 최대값
+      step: 1, // 값 증가 단위
+      initialValue: currentdB, // 초기값 (현재 dB)
+      // valueColor:
+      //   currentdB > 19
+      //     ? "	rgba(255, 0, 55, 0.95)" // 위험 - 빨강
+      //     : currentdB > 9
+      //     ? "rgba(253, 242, 0, 0.95)" // 주의 - 주황
+      //     : "	rgba(57, 255, 20, 0.9)", // 정상 - 하늘색
+      valueColor: "rgba(0,255,230,1)",
+      arcBgFractionColor: "rgba(0, 0, 0, 0.2)", // 배경 게이지 색상
+      // ✅ 게이지 모양 설정
+      backgroundAngle: 270, // 배경 아크 각도
+      arcFractionSpacingRatio: 0.45, // 게이지 조각 간 간격 비율
+      arcFractionLength: 3, // 조각 가로 길이
+      arcFractionThickness: 18, // 조각 세로 길이
+      // ✅ 기타
+      displayName: "Current value", // 디버깅용 이름
+    },
+    {
+      radius: 67,
+      min: 0,
+      max: 50,
+      step: 1,
+      initialValue: (currentdB / 270) * 90,
+      valueColor: "rgba(0,255,230,1)",
+      arcBgFractionColor: "rgba(0, 0, 0, 0.3)",
+      backgroundAngle: 90,
+      arcFractionSpacingRatio: 0.7,
+      arcFractionLength: 1,
+      arcFractionThickness: 5,
+      displayName: "sub value",
+    },
+    {
+      backgroundAngle: 270,
+      radius: 60,
+      min: 0,
+      max: 30,
+      step: 1,
+      initialValue: currentdB,
+      handleFillColor: "rgba(253, 242, 0, 1)", // 핸들 내부 색
+      strokeColor: "rgba(0, 0, 0, 0.2)", //보더
+      strokeThickness: 1,
+      arcBgFractionColor: "",
+      displayName: "Max",
+    },
+  ];
 
   useEffect(() => {
     if (!containerRef.current) return; // ref가 유효하지 않으면 중단
@@ -91,7 +144,7 @@ export default function ArcSlider({ sliders, width = 250, height = 250 }) {
         filter.setAttribute("filterUnits", "userSpaceOnUse");
 
         const gaussianBlur = document.createElementNS(ns, "feGaussianBlur");
-        gaussianBlur.setAttribute("stdDeviation", "1.9"); // 블러가 퍼지는 정도
+        gaussianBlur.setAttribute("stdDeviation", "2"); // 블러가 퍼지는 정도
         gaussianBlur.setAttribute("result", "blur");
 
         const colorMatrix = document.createElementNS(ns, "feColorMatrix");
@@ -102,7 +155,7 @@ export default function ArcSlider({ sliders, width = 250, height = 250 }) {
           `1 0 0 0 0
            0 1 0 0 0
            0 0 1 0 0
-           0 0 0 1.6 0` // 블러 강도 조절
+           0 0 0 1.3 0` // 블러 강도 조절
         );
         colorMatrix.setAttribute("result", "coloredBlur");
 
@@ -133,7 +186,7 @@ export default function ArcSlider({ sliders, width = 250, height = 250 }) {
         spacingRatio = defaultArcFractionSpacingRatio,
         length = defaultArcFractionLength,
         thickness = defaultArcFractionThickness,
-        isActive = true
+        isGlow = true
       ) => {
         const path = document.createElementNS(
           "http://www.w3.org/2000/svg",
@@ -146,7 +199,7 @@ export default function ArcSlider({ sliders, width = 250, height = 250 }) {
         path.setAttribute("stroke", valueColor);
         path.setAttribute("stroke-width", thickness);
         path.setAttribute("stroke-dasharray", `${length} ${spacing}`);
-        if (isActive) {
+        if (isGlow) {
           path.setAttribute("filter", "url(#glow)");
         }
         svg.appendChild(path);
@@ -159,7 +212,7 @@ export default function ArcSlider({ sliders, width = 250, height = 250 }) {
         handleColor,
         strokeColor = "#ffffff",
         strokeThickness = 1,
-        type = "triangle" // "line", "dot", "triangle"
+        type = "triangle" // "line", "triangle"
       ) => {
         addGlowFilter(svg);
         const rad = (angle * tau) / 360;
@@ -189,36 +242,35 @@ export default function ArcSlider({ sliders, width = 250, height = 250 }) {
           triangle.setAttribute("filter", "url(#glow)");
           svg.appendChild(triangle);
         } else {
-          const lineLength = 20;
-          const x2 = cx + (radius + lineLength) * Math.cos(rad - tau / 4);
-          const y2 = cy + (radius + lineLength) * Math.sin(rad - tau / 4);
-
-          const strokeLine = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "line"
-          );
-          strokeLine.setAttribute("x1", x1);
-          strokeLine.setAttribute("y1", y1);
-          strokeLine.setAttribute("x2", x2);
-          strokeLine.setAttribute("y2", y2);
-          strokeLine.setAttribute("stroke", strokeColor);
-          strokeLine.setAttribute("stroke-linecap", "round");
-          strokeLine.setAttribute("stroke-width", 5 + strokeThickness * 2);
-
-          svg.appendChild(strokeLine);
-
-          const line = document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "line"
-          );
-          line.setAttribute("x1", x1);
-          line.setAttribute("y1", y1);
-          line.setAttribute("x2", x2);
-          line.setAttribute("y2", y2);
-          line.setAttribute("stroke", handleColor);
-          line.setAttribute("stroke-width", 3);
-          line.setAttribute("filter", "url(#glow)");
-          svg.appendChild(line);
+          return;
+          // 아크위에 라인 모양 서브 값 표현
+          // const lineLength = 20;
+          // const x2 = cx + (radius + lineLength) * Math.cos(rad - tau / 4);
+          // const y2 = cy + (radius + lineLength) * Math.sin(rad - tau / 4);
+          // const strokeLine = document.createElementNS(
+          //   "http://www.w3.org/2000/svg",
+          //   "line"
+          // );
+          // strokeLine.setAttribute("x1", x1);
+          // strokeLine.setAttribute("y1", y1);
+          // strokeLine.setAttribute("x2", x2);
+          // strokeLine.setAttribute("y2", y2);
+          // strokeLine.setAttribute("stroke", strokeColor);
+          // strokeLine.setAttribute("stroke-linecap", "round");
+          // strokeLine.setAttribute("stroke-width", 5 + strokeThickness * 2);
+          // svg.appendChild(strokeLine);
+          // const line = document.createElementNS(
+          //   "http://www.w3.org/2000/svg",
+          //   "line"
+          // );
+          // line.setAttribute("x1", x1);
+          // line.setAttribute("y1", y1);
+          // line.setAttribute("x2", x2);
+          // line.setAttribute("y2", y2);
+          // line.setAttribute("stroke", handleColor);
+          // line.setAttribute("stroke-width", 3);
+          // line.setAttribute("filter", "url(#glow)");
+          // svg.appendChild(line);
         }
       };
 

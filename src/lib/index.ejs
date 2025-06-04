@@ -1,0 +1,1708 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Check Guard</title>
+    <link rel="stylesheet" type="text/css" href="./fonts/nanumsquare.css">
+    <link rel="stylesheet" type="text/css" href="./fonts/IcoMoon.css">
+    <link rel="stylesheet" type="text/css" href="./fonts/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="./css/datetimepicker.css">
+    <script src="./js/jquery-3.2.1.min.js"></script>
+    <script src="./js/chroma.min.js"></script>
+    <script src="./js/socket.io.js"></script>
+    <script src="./js/moment-with-locales.min.js"></script>
+    <script src="./js/datetimepicker.js"></script>
+    
+<style>
+    html, body { 
+      width:100%; height:100%; padding:0; margin:0; 
+      overflow: hidden; cursor:none; 
+      font-family:UnDotum,"Noto Sans KR", sans-serif;
+    }
+    
+    body { color:#ffffff; background:linear-gradient(black 50%, rgb(50,50,50)); }
+
+    .spot {
+        position:absolute; left:320px; top:150px; border-radius:25px; width:100px; height:100px;
+    }
+    .spot img { width:100%; height:100% }
+    #cross { position:absolute; left:335px; top:165px; width:70px; height:70px;  }
+    
+	input[type="checkbox"] { box-shadow:none; vertical-align:text-bottom;}
+    .up_circle { 
+        display:inline-block; width:60px; height:60px; border-radius:30px; background-color:#3d3d3d; 
+        font-size:12px; text-align:center; color:#b0b0b0; vertical-align:middle; margin:10px 0;
+        box-shadow: -2px -2px 6px rgba(255, 255, 255, .7),
+                            -2px -2px 4px rgba(255, 255, 255, .5),
+                            2px 2px 2px rgba(255, 255, 255, .075),
+                            2px 2px 4px rgba(0, 0, 0, .15);
+        filter:url(#inset-shadow-button);
+    }
+    div.up_circle { margin-top:5px; font-weight:600; }
+    span.icon { font-family: 'IcoMoon-Free' !important; font-size:23px; }
+
+	div.mode { position:absolute; bottom:10px; width:60px; height:60px; border:1px; border-radius:4px; background-color:#ffffff; margin-left:10px; font-size:15px; line-height:57px;}
+    #leftmenu { position:relative; float:left; left:0; top:0; width:85px; height:100%; background-color:black;text-align:center; z-index:1;}
+    #lbl_date { font-size:13px; margin:10px 0 2px 0; }
+    #lbl_time { font-size:18px; margin:2px 0 10px 0; }
+    
+    #videoarea { float:left; width:613px; height:100%; text-align:center; background-color:black;overflow:hidden;}
+    #main_video { position:absolute; width:800px; left:-60px; top:-30px; }
+    #main_thermal { visibility:hidden; position:absolute; width:800px; left:-60px; top:-30px; }
+    #main_uv { visibility:hidden; position:absolute; width:800px; left:-60px; top:-30px; }
+    #spectrogram { position:absolute; left:85px; top: 402px; background-color:black; width:595px; height: 80px; border-top:1px RGB(13,7,134) solid;}
+    #canvas { width:100%; height:100%; }    
+    #rightinfo { position:absolute; top:0; right:0; width:120px; height:100%; text-align:center; background-color:rgb(50,50,50);}
+    div.down_label { 
+        width:90%; height:18px; border-radius:9px; background-color:black; color:#b0b0b0; 
+        font-size:9px; font-weight:600; line-height:17px; margin-top:20px; margin-left:calc(5%); margin-bottom:10px;
+        box-shadow: inset -1px -1px 2px rgba(255, 255, 255, 0.7),
+        inset 1px 1px 2px rgba(0, 0, 0, 0.15);
+    }
+    div.info_value>span{ color:white; font-size:30px; font-weight:500; line-height:23px;}
+    div.info_value>span>small{ font-size:18px; font-weight:500; }
+    div.info_sub { vertical-align:top; line-height:20px; font-size:13px; color:#b0b0b0;}
+    
+    #decibel .info_value>span {color:#00abff; }
+    #decibel div.info_sub { text-align:right; padding-right:5px;}
+    #temperature div.info_sub { text-align:center; }
+    
+    #camera1 { margin-top:25px; }
+    div.camera_btn {
+		display:inline-block; width:105px; height:50px; border-radius:10px; background-color:#6e6e6e; 
+		font-size:12px; text-align:center;
+		vertical-align:middle;
+    	margin-top:10px;
+    	font-weight:bold;
+    	line-height:50px;
+    }
+    div.down_btn {
+		box-shadow: inset -2px -2px 4px rgba(255, 255, 255, 0.3),
+    				inset 2px 2px 4px rgba(0, 0, 0, 0.4);
+    	color:#ffff7f;
+    }
+    
+    div.up_btn {
+		box-shadow: inset -2px -2px 4px rgba(0, 0, 0, 0.3),
+    				inset 2px 2px 4px rgba(255, 255, 255, 0.4);
+    	color:#323232;
+    }
+    
+    #leftBlur { position:absolute; display:none; height:80px; backdrop-filter: blur(1px); background-color: rgba(255, 255, 255, 0.2); left:0; top:0;width:80px; overflow:hidden;border-right:1px solid #ccc;}
+    #rightBlur { position:absolute; display:none; height:80px; backdrop-filter: blur(1px); background-color: rgba(255, 255, 255, 0.2); right:0; top:0;width:80px; overflow:hidden;border-left:1px solid #ccc;}
+    
+    #recording { position:absolute; font-size:20px; left:100px; top:15px; visibility:hidden;}
+    .blink { color:red; font-size:20px;}
+    #rec_time { color:white; vertical-align:baseline;}
+    #colormap { position:absolute; font-size:15px; left:90px; top:355px; width:300px; height:25px; text-align:center; visibility:hidden;}
+    #min_temp { float:left; }
+    #max_temp { float:right; }
+    #colormap>img { width:100%; top:21px; height:14px;}
+    #modalWindow { position:absolute; visibility:hidden; left:0; top:0; width:800px; height:480px; background-color:rgba(0,0,0,0.8); z-index:99}
+    
+    #calibration { position:absolute; visibility:hidden; width:700px; height:70px; left:50px; top:395px; border-radius:10px; background-color:#27261dd0; }
+    
+    #messageWindow { position:absolute; visibility:hidden; width:500px; height:200px; left:150px; top:120px; padding-left:25px; border-radius:10px; background-color:#27261d;}
+	#msg {
+		margin-left:20px;
+		font-size:15px;
+	}
+    
+    #settingWindow { position:absolute; visibility:hidden; width:700px; height:400px; left:50px; top:20px; padding-left:25px; border-radius:10px; background-color:#27261d;}
+    div.settingMenu {
+		display:inline-block; border-radius:10px; background-color:#6e6e6e; 
+		width:200px; height:140px; margin:20px 10px; float:left; 
+		font-size:18px; text-align:center;
+		vertical-align:middle;
+    	font-weight:bold;
+    	line-height:20px;
+    	padding-top:10px;
+    }
+    #fileWindow { position:absolute; visibility:hidden; width:700px; height:400px; left:50px; top:20px; padding-left:25px; border-radius:10px; background-color:#27261d; }
+	#file_scroll { position:relative; left:0; width:680px; height:280px; overflow-y:scroll;}
+::-webkit-scrollbar {
+  width: 30px;
+  height: 30px;
+}
+ ::-webkit-scrollbar-track {
+   background: #a0a0a0;
+  border-radius:15px;
+}
+ 
+::-webkit-scrollbar-thumb {
+  background: #505050;
+  border: 1px solid #a0a0a0;
+  border-radius:15px;
+}
+	.tbl-grid {
+		width:650px;
+		border:none;
+		border-collapse:collapse;
+		border-spacing:2px;
+		color:white;
+		font-weight:400;
+	}
+	.tbl-grid th {
+		font-weight:600;
+		line-height:1rem;
+		background:rgba(109,176,243,0.4);
+		box-shadow:0 1px 0 0 rgb(109 176 243 /20%) inset 0 1px 0 0 #6db0f3;
+		box-sizing:border-box;
+		white-space:nowrap;
+		text-overflow:ellipsis;
+		
+	}
+	.tbl-grid th, .tbl-grid td {
+		font-size: 0.8rem;
+		padding:0.4rem;
+		text-align:center;
+		border-left: 1px solid rgba(110,175,245,0.2);
+		border-bottom: 1px solid rgba(110,175,245,0.2);
+	}
+	.tbl-grid tbody tr:hover td {
+		color:white;
+		background-color:#0f5499 !important; 
+	}
+	.tbl-grid tbody td button { cursor:pointer; width:3.667rem; height:1rem; font-size:0.5rem; font-weight:500; border:none; border-radius:0.4rem; background-color:#505050; margin-left:0.8rem; color:white;}
+
+	#modalWindow h2 {
+		font-weight:bold;
+		color:white;
+		font-size:20px;
+		padding:10px 0 0 0;
+		margin-bottom:5px;
+	}
+	#modalWindow h3 {
+		font-weight:bold;
+		color:white;
+		font-size:15px;
+		padding:10px 0 0 10px;
+		margin-top:0;
+		margin-bottom:5px;
+	}
+	#modalWindow hr {
+		margin:7px 20px;
+		border-color:#808080;
+	}
+	#message {
+		margin-left:20px;
+		font-size:12px;
+	}
+	.winButton {
+		box-shadow: inset -2px -2px 4px rgba(0, 0, 0, 0.3),
+    				inset 2px 2px 4px rgba(255, 255, 255, 0.4);
+    	background-color:#303030;
+    	color:#afadad;
+    	position:absolute;
+    	text-align:center;
+    	height:30px;
+    	border-radius:7px;
+    	padding-top:3px;
+    	bottom:15px;
+	}
+	
+    #ok_btn { width:100px; left:560px; }
+    #ok_btn2 { width:100px; left:560px; }
+    #ok_btn3 { width:100px; left:560px; }
+    #ok_btn4 { width:100px; left:400px; }
+    #copy_btn { width:150px; left:35px; }
+	#delete_btn { width:100px; left:200px; }
+
+	#btnTempRange { position:absolute; }
+	.btn_temp { position:absolute; right:120px; }
+	#max_btn { top: 20px; }
+	#min_btn { top: 60px; }
+</style>
+<script>
+  var canv;
+  var canvHeight = 80;
+  var canvWidth = 595;
+  var aplot,
+    previousData,
+    analyser, nyquist,
+    spectorgramAnimationTimer,
+    spectrogramInterval;
+  var canvasCtx;
+  var colormap;
+  var currPalette = 4;
+  var currTempRange = <%-global.config.get("thermal.range")%>;
+  var peakDB = 0.0;
+  var dB = 0.0;
+  var band = 0;
+  var bCurrRecord = false;
+  var recStartTime = 0;
+  
+  var socket = io();
+  var processing = false;
+  
+  var FileName = "";
+  var captureStep = 0;
+  var currCam = -1;
+  var retryCount = 0;
+  var bFirstFFT = true;
+  
+  socket.on('filecopy',function(data) {
+  	$("#transfer").html("&nbsp; "+data.curr + " / " + data.max + " files copied");
+  });
+  
+  socket.on('filedelete',function(data) {
+  	$("#transfer").html("&nbsp; "+data.curr + " / " + data.max + " files deleted");
+  });
+  
+  socket.on('packet',function(data) {
+    if (processing) return;
+    bFirstFFT = false;
+    processing = true;
+    if (band != parseFloat(data.band)) {
+      band = parseFloat(data.band);
+      if (band == 0) {
+        $("#leftBlur").css('display', 'none');
+        $("#rightBlur").css('display', 'none');
+      } else {
+        if (band < 0.5) {
+          band = 0.5;
+          $("#leftBlur").css('display', 'none');
+          $("#rightBlur").width(canvWidth - 30);
+          $("#rightBlur").css('display', 'block');
+        } else {
+          if (band > 47.0) {
+            band = 47.0;
+            $("#leftBlur").width(canvWidth - 30);
+            $("#leftBlur").css('display', 'block');
+            $("#rightBlur").css('display', 'none');
+          } else {
+            $("#leftBlur").width((band - 1) * (canvWidth/48));
+            $("#rightBlur").width(canvWidth - (band + 1)*(canvWidth/48));
+            $("#leftBlur").css('display', 'block');
+            $("#rightBlur").css('display', 'block');
+          }       
+        }
+      }
+    }
+    peakDB = parseFloat(data.peak);
+    dB = parseFloat(data.db);
+    fft = new Uint8Array(data.fft);
+    processing = false;
+    updateCanvas(canv, fft);
+  });
+  
+  function stopRecord() {
+  	bCurrRecord = false;
+	$("#recording").css('visibility', 'hidden');
+    $.ajax({
+        type: 'GET',
+        url:"/stopRecord", 
+        cache:false,
+        async:true,
+        complete:function(data) {
+        	messageWindow("녹화가 끝났습니다.");
+        }, 
+        error:function(request, status, error) {
+        }
+    });
+    if ($("#camera1").hasClass("down_btn")) {
+    	// Vision Camera Record Stop
+	    $.ajax({
+	        type: 'GET',
+	        url:"http://127.0.0.1:5431/stoprecord",
+	        cache:false,
+	        async:true,
+	        complete:function(data) {}, 
+	        error:function(request, status, error) {
+	        }
+	    });    	
+    } else if ($("#camera2").hasClass("down_btn")) {
+    	// Thermal Camera Record Stop
+	    $.ajax({
+	        type: 'GET',
+	        url:"http://127.0.0.1:5432/stoprecord",
+	        cache:false,
+	        async:true,
+	        complete:function(data) {}, 
+	        error:function(request, status, error) {
+	        }
+	    });    	
+    } else if ($("#camera3").hasClass("down_btn")) {
+    	// UV Camera Record Stop
+	    $.ajax({
+	        type: 'GET',
+	        url:"http://127.0.0.1:5433/stoprecord",
+	        cache:false,
+	        async:true,
+	        complete:function(data) {}, 
+	        error:function(request, status, error) {
+	        }
+	    });
+    }
+    
+  };
+  
+  var recFileName = "";
+  function startRecord() {
+  	if ($("#modalWindow").css('visibility') === "visible") {
+  		return;
+  	}
+  	var dt= new Date();
+	$("#recording").css('visibility', 'visible');
+	
+	recFileName = dt.getFullYear()+padZero(dt.getMonth()+1)+padZero(dt.getDate())+"_"
+        	+ padZero(dt.getHours())+padZero(dt.getMinutes())+padZero(dt.getSeconds());
+	
+	// FFT(Node) & Audio(Teensy) Save
+    $.ajax({
+        type: 'GET',
+        url:"/startRecord?fName="+recFileName,
+        cache:false,
+        async:true,
+        complete:function(data) {
+        	if (data.responseText.indexOf("ERR")>=0) {
+        		stopRecord();
+        		console.log("Recording Start Failed");
+        	} else {
+			  	bCurrRecord = true; 	
+	        	recStartTime = new Date();
+	        	drawRecTime();
+	        	saveRecord(recFileName);
+	        }
+        }, 
+        error:function(request, status, error) {
+        }
+    });
+}
+
+function checkSnapDone(url)
+{
+	$.ajax({
+	    type: 'GET',
+	    url:url+"?time="+new Date().getTime(),
+	    cache:false,
+	    async:true,
+	    complete:function(data) {
+	    	if (data.responseText.indexOf("FALSE")>=0) {
+		    	console.log("Wait Capture");
+	    		setTimeout("checkSnapDone('"+url+"')",200);
+	    	} else {
+		    	console.log("Capture Done");
+	    		captureStep++;
+	    		setTimeout("captureAllCamera()",100);
+	    	}
+	    }, 
+	    error:function(request, status, error) {
+	    	messageWindow("저장 오류");
+	    }
+	});
+}
+
+function reconnectSocket() {
+	if (bFirstFFT) {
+		// Reconnect
+		$.ajax({
+		    type: 'GET',
+		    url:"/reopen" ,
+		    cache:false,
+		    async:true,
+		    complete:function(data) {
+		    }, 
+		    error:function(request, status, error) {
+		    }
+		});
+	}
+}
+
+function captureFFT() {
+	
+	// FFT Snap
+	$.ajax({
+	    type: 'GET',
+	    url:"/snapshot?fName=" + FileName ,
+	    cache:false,
+	    async:true,
+	    complete:function(data) {
+	    	setTimeout("checkSnapDone('/snapdone')",100);
+	    }, 
+	    error:function(request, status, error) {
+	    	messageWindow("FFT 저장 오류");
+	    }
+	});
+}
+
+function captureVision() {
+	// Vision Snap
+	$.ajax({
+	    type: 'GET',
+	    url:"http://127.0.0.1:5431/snapshot?fname=" + FileName ,
+	    cache:false,
+	    async:true,
+	    complete:function(data) {
+	    	setTimeout("checkSnapDone('http://127.0.0.1:5431/snapdone')",100);
+	    }, 
+	    error:function(request, status, error) {
+	    	messageWindow("비전 저장 오류");
+	    }
+	});
+}
+
+function captureThermal() {
+	// Thermal Snap
+	$.ajax({
+	    type: 'GET',
+	    url:"http://127.0.0.1:5432/snapshot?fname=" + FileName ,
+	    cache:false,
+	    async:true,
+	    complete:function(data) {
+	    	setTimeout("checkSnapDone('http://127.0.0.1:5432/snapdone')",100);
+	    }, 
+	    error:function(request, status, error) {
+	    	messageWindow("열화상 저장 오류");
+	    }
+	});
+}
+
+function captureUV() {
+	// UV Snap
+	$.ajax({
+	    type: 'GET',
+	    url:"http://127.0.0.1:5433/snapshot?fname=" + FileName ,
+	    cache:false,
+	    async:true,
+	    complete:function(data) {
+	    	setTimeout("checkSnapDone('http://127.0.0.1:5433/snapdone')",100);
+	    }, 
+	    error:function(request, status, error) {
+	    	messageWindow("UV 저장 오류");
+	    }
+	});
+}
+
+function getCurrCamera() {
+    if ($("#camera1").hasClass("down_btn")) {
+		return "VISION";
+	} else if ($("#camera2").hasClass("down_btn")) {
+		return "THERMAL";
+	} else if ($("#camera3").hasClass("down_btn")) {
+		return "UV";
+	}
+	return "";
+}
+
+function saveRecord(fname) {
+    if ($("#camera1").hasClass("down_btn")) {
+    	// Vision Camera Record Start
+	    $.ajax({
+	        type: 'GET',
+	        url:"http://127.0.0.1:5431/record?fname="+fname,
+	        cache:false,
+	        async:true,
+	        complete:function(data) {}, 
+	        error:function(request, status, error) {
+	        }
+	    });    	
+    	
+    } else if ($("#camera2").hasClass("down_btn")) {
+    	// Thermal Camera Record Start
+	    $.ajax({
+	        type: 'GET',
+	        url:"http://127.0.0.1:5432/record?fname="+fname,
+	        cache:false,
+	        async:true,
+	        complete:function(data) {}, 
+	        error:function(request, status, error) {
+	        }
+	    });    	
+    } else if ($("#camera3").hasClass("down_btn")) {
+    	// UV Camera Record Start
+	    $.ajax({
+	        type: 'GET',
+	        url:"http://127.0.0.1:5433/record?fname="+fname,
+	        cache:false,
+	        async:true,
+	        complete:function(data) {}, 
+	        error:function(request, status, error) {
+	        }
+	    });    	
+    }
+}
+
+function getPalette()
+{
+	var currCamera = getCurrCamera();
+	var url = "";
+
+	url = "/palette?cam="+currCamera;
+
+    $.ajax({
+        type: 'GET',
+        url:url, 
+        cache:false,
+        async:true,
+        complete:function(data) {
+        	if (data.responseText) {
+        		$($("#colormap > img")[0]).attr("src", "/images/colormap/"+data.responseText+".jpg");
+       			currPalette = parseInt(data.responseText);
+        	}
+        }, 
+        error:function(request, status, error) {
+        }
+    });
+}
+
+function changePalette()
+{
+	var currCamera = getCurrCamera();
+	
+	currPalette ++;
+	if (currPalette > 22) currPalette = 1;
+
+	var url = "";
+	url = "/palette?cam="+currCamera + "&pal="+currPalette;
+    $.ajax({
+        type: 'GET',
+        url:url, 
+        cache:false,
+        async:true,
+        complete:function(data) {
+        	if (data.responseText) {
+        		$($("#colormap > img")[0]).attr("src", "/images/colormap/"+data.responseText+".jpg");
+    			currPalette = parseInt(data.responseText);
+        	}
+        }, 
+        error:function(request, status, error) {
+        }
+    });
+	
+}
+
+var CaliCamera = "";
+
+  socket.on('button',function(data) {
+  	if ($("#modalWindow").css('visibility') === "visible" && !bCaliMode) {
+  		// Ignore All Button 
+  	} else if (bCurrRecord) {
+  		// Ignore All Button Until Record Done
+  		if (data.button == '7') {
+			stopRecord();
+  		}
+  	} else {
+		if (data.button == '8') {
+			if ($("#modalWindow").css('visibility') !== "visible") {
+				if (captureStep == 0) {
+					var dt= new Date();
+					FileName = dt.getFullYear()+padZero(dt.getMonth()+1)+padZero(dt.getDate())+"_"
+				    	+ padZero(dt.getHours())+padZero(dt.getMinutes())+padZero(dt.getSeconds());
+		
+					// Capture All Camera
+					captureStep = 1;
+					setTimeout("captureAllCamera()",10);
+				}
+			}
+	    } else if (data.button == '7') {
+			if ($("#modalWindow").css('visibility') !== "visible") {
+				// Record 
+				if (bCurrRecord) {
+					stopRecord();
+				} else {
+					startRecord();
+				}      
+			}
+	    } else if (data.button == '6') {
+	      // Up
+	      if (bCaliMode) {
+	      	if (CaliCamera === "THERMAL") {
+	      		$("#main_thermal").css('top', ($("#main_thermal").offset().top + 10)+'px');
+	      	}else if (CaliCamera === "UV") {
+	      		$("#main_uv").css('top', ($("#main_uv").offset().top + 10)+'px');
+	      	} else {
+	      		$("#main_video").css('top', ($("#main_video").offset().top + 10)+'px');
+	      	}
+	      } else {
+	      	var currCamera = getCurrCamera();
+	      	if (currCamera === "VISION") {
+	      		camInit(2);
+	      	} else if (currCamera === "THERMAL") {
+	      		camInit(0);
+	      	} else if (currCamera === "UV") {
+	      		camInit(1);
+	      	}
+	      }
+	    } else if (data.button == '5') {
+	      // Left
+	      if (bCaliMode) {
+	      	if (CaliCamera === "THERMAL") {
+		      $("#main_thermal").css('left', ($("#main_thermal").offset().left + 10)+'px');
+	      	} else if (CaliCamera === "UV") {
+	      		$("#main_uv").css('left', ($("#main_uv").offset().left + 10)+'px');
+		    } else {
+		      $("#main_video").css('left', ($("#main_video").offset().left + 10)+'px');
+		    }
+		  }
+	    } else if (data.button == '4') {
+	      // OK
+	      var currCamera = getCurrCamera();
+	      if (bCaliMode) {
+	      	saveCalibrationWindow();
+		  } else if (currCamera === "THERMAL" || currCamera === "UV") {
+		    changePalette();
+		  }
+	    } else if (data.button == '3') {
+	      // Right
+	      if (bCaliMode) {
+	      	if (CaliCamera === "THERMAL") {
+		        $("#main_thermal").css('left', ($("#main_thermal").offset().left - 10)+'px');
+	      	} else if (CaliCamera === "UV") {
+	      		$("#main_uv").css('left', ($("#main_uv").offset().left - 10)+'px');
+		    } else {
+	        	$("#main_video").css('left', ($("#main_video").offset().left - 10)+'px');
+	        }
+	      }
+	    } else if (data.button == '2') {
+	      // Down
+	      if (bCaliMode) {
+	      	if (CaliCamera === "THERMAL") {
+		        $("#main_thermal").css('top', ($("#main_thermal").offset().top - 10)+'px');
+	      	} else if (CaliCamera === "UV") {
+	      		$("#main_uv").css('top', ($("#main_uv").offset().top - 10)+'px');
+		    } else {
+	        	$("#main_video").css('top', ($("#main_video").offset().top - 10)+'px');
+	        }
+	      } else {
+	      	var currCamera = getCurrCamera();
+	      	if (currCamera === "VISION") {
+	      		camInit(1);
+	      	} else if (currCamera === "THERMAL") {
+	      		camInit(2);
+	      	} else if (currCamera === "UV") {
+	      		camInit(0);
+	      	}
+	      }
+	    } else if (data.button == '1') {
+	      // Refresh Button
+	      window.location.reload(true);
+	    }
+	 }
+  });
+  
+  
+  var retryCnt = 0;
+  var initCnt = 0;
+  
+  function captureAllCamera() {
+  	if (captureStep == 0) return;
+  	
+  	if (captureStep == 1) {
+  		captureFFT();
+  	} else if (captureStep == 2) {
+  		camInit(0);
+  		captureVision();
+  	} else if (captureStep == 3) {
+  		camInit(1);
+  		captureThermal();
+  	} else if (captureStep == 4) {
+  		camInit(2);
+  		captureUV();
+  	} else if (captureStep == 5) {
+		FileName = "";
+  		camInit(0);
+		messageWindow("캡쳐가 완료되었습니다.");
+  		captureStep = 0;
+		return;
+	}
+  }
+  
+  function spectDataToImageData(newData,ctx){
+    var imgData = ctx.getImageData(0, 0, canvWidth-1, 1);   
+    var fftSize = newData.byteLength;    // 512 ea
+    var fRatio = parseFloat(canvWidth) / parseFloat(fftSize);
+    for (var i = 0; i < canvWidth; i ++) {
+      var iPos = Math.round( i / fRatio );
+      var dt = newData[iPos];
+      if (dt < 0) {
+        console.log(dt);
+      }
+      imgData.data[i*4 + 0] = colormap.red[dt];
+      imgData.data[i*4 + 1] = colormap.green[dt];
+      imgData.data[i*4 + 2] = colormap.blue[dt];
+      imgData.data[i*4 + 3] = 255;
+    }
+    return imgData;
+  }
+
+  function updateCanvas(ctx, newData) {
+    if (previousData === undefined) previousData=newData;
+    // get previous canvas data 
+    var imgData = ctx.getImageData(0, 0, canvWidth-1, canvHeight - 1);
+    // shift previous canvas content along 
+    ctx.putImageData(imgData, 0, 1);
+    // add new data
+    ctx.putImageData(spectDataToImageData(newData,ctx), 0, 0);
+    previousData=newData;
+  }
+  
+  function linspace(start, stop, num) {
+    const div = num;
+    const step = (stop - start) / div;
+    return Array.from({length: num}, (_, i) => start + step * i);
+  }
+  
+
+  function setupColorMap() {
+    colormap = new Object();
+    colormap.red = new Uint8Array(256);
+    colormap.green = new Uint8Array(256);
+    colormap.blue = new Uint8Array(256);
+    
+/*
+  0        0   0   0
+ 32        0   0  16
+ 64        0   0  
+ 96   96   0   0 255
+160   64   0 255 255
+192   32 128 255 128
+224   32 255 255   0
+256   32 255 255 255
+*/
+
+    for (var i=0; i<160; i++) {  
+      colormap.red[i] = 0;
+    }
+    for (var i=160; i<224; i++) {
+      colormap.red[i] = (i-160)*4;
+    }
+    for (var i=224; i<256; i++) {
+      colormap.red[i] = 255;
+    } 
+
+
+    for (var i=0; i<96; i++) {  
+      colormap.green[i] = 0;
+    }
+    for (var i=96; i<160; i++) { 
+      colormap.green[i] = (i-96)*4;
+    }
+    for (var i=160; i<256; i++) {
+      colormap.green[i] = 255;
+    }
+
+    for (var i=0; i<32; i++) {
+      colormap.blue[i] = i*0.5;
+    }
+    for (var i=32; i<64; i++) {
+      colormap.blue[i] = 16+(i-32);
+    }
+    for (var i=64; i<96; i++) {
+      colormap.blue[i] = 48+(i-64)*6.5;
+    }
+    for (var i=96; i<160; i++) { 
+      colormap.blue[i] = 255;
+    }
+    for (var i=160; i<224; i++) {
+      colormap.blue[i] = 255-(i-160)*4;
+    }
+    for (var i=225; i<256; i++) {
+      colormap.blue[i] = (i - 225)*8;
+    }
+
+  }
+
+  function setupColorMap2() {
+    colormap = new Object();
+    colormap.red = new Uint8Array(256);
+    colormap.green = new Uint8Array(256);
+    colormap.blue = new Uint8Array(256);
+    
+    // jet map 
+    for (var i=0; i<96; i++) {  // 0 ~ 96
+      colormap.red[i] = 0;
+    }
+    for (var i=0; i<64; i++) {  // 96 ~ 159
+      colormap.red[i+96] = i*4;
+    }
+    for (var i=0; i<64; i++) {  // 160 ~ 223
+      colormap.red[i+96+64] = 255;
+    } 
+    for (var i=0; i<32; i++) {  // 224 ~ 255
+      colormap.red[i+96+128] = 255 - i * 4;
+    }
+
+    for (var i=0; i<32; i++) {  // 0 ~ 32
+      colormap.blue[i] = i*4;
+    }
+    for (var i=0; i<64; i++) {  // ~ 96
+      colormap.blue[i+32] = 255;
+    }
+    for (var i=0; i<64; i++) {  // ~ 160
+      colormap.blue[i+32+64] = 255-i*4;
+    }
+    for (var i=0; i<96; i++) {  // ~ 256
+      colormap.blue[i+32+128] = 0;
+    }
+
+    for (var i=0; i<96; i++) {  // 0 ~ 96
+      colormap.green[i] = i*2.6;
+    }
+    for (var i=0; i<64; i++) {  // ~ 160
+      colormap.green[i+96] = 255;
+    }
+    for (var i=0; i<64; i++) {  // ~ 224
+      colormap.green[i+32+128] = 255-i*4;
+    }
+    for (var i=0; i<32; i++) {  // ~ 256
+      colormap.green[i+32+192] = 0;
+    }
+
+  }
+
+function padZero( i ) {
+    if (i < 10) {
+        return "0"+i;
+    }
+    return i;
+}
+
+function checkTimeout() {     
+    var dt= new Date();
+
+    $("#lbl_time").text( padZero(dt.getHours())+":" + padZero(dt.getMinutes())+":" + padZero(dt.getSeconds()) );
+    $("#lbl_date").text( dt.getFullYear()+"." + padZero(dt.getMonth()+1) + "."+padZero(dt.getDate()));
+    setTimeout("checkTimeout()",1000);
+}   
+
+$.ajax({
+    type: 'GET',
+    url:"/startMesure", 
+    cache:false,
+    async:true
+});
+
+function drawRecTime()
+{
+	var now = new Date();
+	var diff = Math.floor((now - recStartTime) / 10);
+	
+	var msec = diff % 100;
+	diff = Math.floor((diff - msec)/100);
+	
+	var sec =  diff % 60;
+	diff = Math.floor((diff - sec)/60);
+	
+	var min = diff % 60;
+
+	$("#rec_time").html( padZero(min) + ":" + padZero(sec) + ":" + padZero(msec));
+
+	if (min >= 2) {
+		// 2분 이상 강제 종료
+		console.log("Force Stop Recording");
+		$("#recording").css('visibility', 'hidden');
+		stopRecord();
+	}
+	
+	if (bCurrRecord) {
+		setTimeout("drawRecTime()",10);
+	}
+}
+
+function drawUI() {
+    var dec_int = Math.trunc(dB);
+    var dec_dec = Math.trunc(Math.abs(dB - dec_int)*10);
+    $($("#decibel>div.info_value>span")[0]).html(dec_int+"<small>."+dec_dec+"dB</small>");
+    if (band == 0) {
+      $($("div#decibel div.info_sub > span")[0]).html("@all band");
+    } else {
+      $($("div#decibel div.info_sub > span")[0]).html("@"+band+"kHz");
+    }
+    //calc(390 - width/2)
+    // width : 25px ~ 100px
+    // DB      10  ~ 100db
+    dec_int+=5;
+    if (dec_int > 50) {
+        $(".spot").css("left", (320-(dec_int-50)/2)+"px");
+        $(".spot").css("top", (150-(dec_int-50)/2)+"px");
+        $(".spot").css("width", (dec_int+50)+"px");
+        $(".spot").css("height",(dec_int+50)+"px");
+        dec_int = 50;
+    } else {
+        $(".spot").css("left", "320px");
+        $(".spot").css("top", "150px");
+        $(".spot").css("width", "100px");
+        $(".spot").css("height", "100px");
+    }
+    $(".spot img").css("mask-image", "radial-gradient(circle at 50% 50%, black 5%, transparent "+dec_int+"%)");
+
+    setTimeout("drawUI()",200);
+
+}
+
+function drawDistance()
+{
+	if ($("#modalWindow").css('visibility') === "visible") {
+        setTimeout("drawDistance()",500);
+		return;
+	}
+	$.ajax({
+        type: 'GET',
+        url:"/getDistance", 
+        cache:false,
+        async:true,
+        complete:function(data) {
+          if (data.responseText) {
+            if (data.responseText.startsWith("DIST=")) {
+                var dist = parseFloat(data.responseText.substring(5));
+                if (isNaN(dist)) dist = 0;
+                var dist_int = Math.trunc(dist);
+                var dist_dec = Math.round((dist - dist_int)*100);
+
+                $($("#distance>div.info_value>span")[0]).html(dist_int+"<small>."+dist_dec+"m</small>");                
+            }
+            setTimeout("drawDistance()",500);
+          }
+        }, 
+        error:function(request, status, error) {
+            console.log("message: " + request.responseText);
+            setTimeout("drawDistance()",5000);
+        }
+    });
+}
+
+function drawTemperature()
+{
+	if ($("#modalWindow").css('visibility') === "visible") {
+	    setTimeout("drawTemperature()",800);
+		return;
+	}
+
+	// 640 x 512  ==>  800 x 640 
+	// X : 800 = 17 + 85 + 595 + 103 : Center = 17 + 85 + 595/2
+	// Y : 640 = 120 + 400 + 120 : Center
+	// ViewPort = 595 x 400  => 298 x 200
+	// 85 |  595  | 85 ==> ( x= -17 ) 17 + 85 | 595 | 85 (102 - 17)
+
+	var ratio = 640.0 / 800.0;
+	var centerX = parseInt((85 + 298 - $("#main_thermal").position().left) * ratio);
+	var centerY = parseInt((200 - $("#main_thermal").position().top) * ratio);
+	var url = "http://127.0.0.1:5432/getTemperature";
+    $.ajax({
+        type: 'GET',
+        url:url, 
+        data:{x:centerX, y:centerY},
+        cache:false,
+        async:true,
+        complete:function(data) {
+          if (data.responseText) {
+          	if (data.responseText.startsWith("<")) {
+          		// Error
+	            console.log("message: " + data.responseText);
+	            setTimeout("drawTemperature()",30000);
+          	} else {
+	            var temp = data.responseText.split("/");
+	            
+	            if (temp.length == 4) {
+		            var temp_c   = Math.trunc(parseFloat(temp[0])*10)/10;
+		            var temp_min = Math.trunc(parseFloat(temp[1])*10)/10;
+		            var temp_max = Math.trunc(parseFloat(temp[2])*10)/10;
+		            var temp_avg = Math.trunc(parseFloat(temp[3])*10)/10;
+		            
+	                var strTemp = "";
+	                var temp_int = Math.trunc(temp_c);
+	                var temp_dec = Math.trunc(Math.abs(temp_c - temp_int)*10);
+	                
+	                strTemp = temp_int+"<small>."+temp_dec+"℃</small>";
+		            $($("#temperature>div.info_value>span")[0]).html(strTemp);                
+		            
+		            strTemp = temp_min+"℃ &nbsp; "+temp_max+"℃";
+		            $($("#temperature div.info_sub>span")[0]).html(strTemp);                
+		            
+		            setTimeout("drawTemperature()",800);
+				} else {
+		            setTimeout("drawTemperature()",2000);
+				}
+			}
+		  } else {
+            setTimeout("drawTemperature()",2000);
+		  }
+        }, 
+        error:function(request, status, error) {
+            console.log("message: " + request.responseText);
+            setTimeout("drawTemperature()",30000);
+        }
+    });
+}
+
+function setBand()
+{
+    $.ajax({
+        type: 'GET',
+        url:"/setBand?band="+band, 
+        cache:false,
+        async:true,
+        complete:function(data) {
+        }, 
+        error:function(request, status, error) {
+        }
+    });
+}
+
+function setTime(nowTime="")
+{
+	var strUrl = "";
+	if (nowTime === "") {
+		strUrl = "/setTime";
+	} else {
+		strUrl = "/setTime?datetime="+nowTime;
+	}
+    $.ajax({
+        type: 'GET',
+        url:strUrl, 
+        cache:false,
+        async:true,
+        complete:function(data) {
+        }, 
+        error:function(request, status, error) {
+        }
+    });
+}
+
+var visionX = <%-global.config.get("vision.x")%>;
+var visionY = <%-global.config.get("vision.y")%>;
+var thermalX = <%-global.config.get("thermal.x")%>;
+var thermalY = <%-global.config.get("thermal.y")%>;
+var uvX = <%-global.config.get("uv.x")%>;
+var uvY = <%-global.config.get("uv.y")%>;
+
+// Init camera
+function camInit(cam) {
+	if (bCurrRecord) return;
+	
+	stopPreview();
+	if (cam == 0) {
+		$("#main_video").css('left', visionX+'px');
+		$("#main_video").css('top', visionY+'px');
+
+		$("#camera1").attr('class', 'down_btn camera_btn');
+		$("#camera2").attr('class', 'up_btn camera_btn');
+		$("#camera3").attr('class', 'up_btn camera_btn');
+		$("#main_thermal").css('visibility', 'hidden');
+		$("#main_video").css('visibility', 'visible');
+		$("#main_uv").css('visibility', 'hidden');
+		$("#colormap").css('visibility', 'hidden');
+		$("#colormap>span").css('visibility', 'hidden');
+	} else if (cam == 1) {
+		$("#main_thermal").css('left', thermalX+'px');
+		$("#main_thermal").css('top', thermalY+'px');
+
+		$("#camera1").attr('class', 'up_btn camera_btn');
+		$("#camera2").attr('class', 'down_btn camera_btn');
+		$("#camera3").attr('class', 'up_btn camera_btn');
+		$("#main_thermal").css('visibility', 'visible');
+		$("#main_video").css('visibility', 'hidden');
+		$("#main_uv").css('visibility', 'hidden');
+		$("#colormap>span").css('visibility', 'visible');
+		$("#colormap").css('visibility', 'visible');
+		getPalette();
+	} else if (cam == 2) {
+		$("#main_uv").css('left', uvX+'px');
+		$("#main_uv").css('top', uvY+'px');
+		
+		$("#camera1").attr('class', 'up_btn camera_btn');
+		$("#camera2").attr('class', 'up_btn camera_btn');
+		$("#camera3").attr('class', 'down_btn camera_btn');
+		$("#main_thermal").css('visibility', 'hidden');
+		$("#colormap>span").css('visibility', 'hidden');
+		$("#main_video").css('visibility', 'hidden');
+		$("#colormap").css('visibility', 'visible');
+		$("#main_uv").css('visibility', 'visible');
+		getPalette();
+	}
+	startPreview();
+}
+
+function updateDate(newDate)
+{
+	var newDate2 = newDate.format("YYYY-MM-DD HH:mm:ss");
+	setTime(newDate2);  // Update Teensy Datetime
+}
+
+function checkCamReady()
+{
+	var strUrl = "";
+	strUrl = "http://localhost:5431/ready";
+
+    $.ajax({
+        type: 'GET',
+        url:strUrl, 
+        cache:false,
+        async:true,
+        complete:function(data) {
+			if (data.responseText === "TRUE") {
+				$("#main_video").attr("src", "http://localhost:5431/vision?stream=TRUE&time=");
+				camInit(0);
+			} else {
+				setTimeout("checkCamReady()",500);
+			}
+        }, 
+        error:function(request, status, error) {
+			setTimeout("checkCamReady()",1000);
+        }
+    });	
+}
+
+// Main init
+function mainInit() {
+    canv = document.getElementById("colorPlot").getContext("2d");
+    var canvas = document.getElementById("colorPlot");
+    canvas.width = canvWidth;
+    canvas.height = canvHeight;
+    setupColorMap();
+	
+	setTime();
+    $('#btnDateTime').dateTimePicker({ positionShift: { top: -80, left: -200 }, updateDateTime: updateDate, locale:"ko"});
+
+    setTimeout("checkCamReady()",1000);
+    setTimeout("drawUI()",100);
+    setTimeout("drawDistance()",500);
+    setTimeout("drawTemperature()",600);
+    setTimeout("checkTimeout()",700);
+	setTimeout("reconnectSocket()", 2000);
+	
+	var url = "";
+	if (currTempRange == 1) {
+		url = "http://localhost:3452/range?curr="+currTempRange+"&min=10&max=30";
+	} else if (currTempRange == 2) {
+		url = "http://localhost:3452/range?curr="+currTempRange+"&min=10&max=50";
+	} else if (currTempRange == 3) {
+		url = "http://localhost:3452/range?curr="+currTempRange+"&min=0&max=100";
+	} else if (currTempRange == 4) {
+		url = "http://localhost:3452/range?curr="+currTempRange+"&min=-10&max=100";
+	} else if (currTempRange == 5) {
+		url = "http://localhost:3452/range?curr="+currTempRange+"&min=0&max=600";
+	}
+	$.ajax({
+	    type: 'GET',
+	    url:url, 
+	    cache:false,
+	    async:true,
+	    complete:function(data) {
+			updateTempRange();
+	    }, 
+	    error:function(request, status, error) {
+	    }
+	});
+	setShift();
+}
+
+function settingWindow() {
+	if (bCurrRecord) return;  // 녹화중 팝업 안띄움
+	
+	updateTempRange();
+	$("#settingWindow").css('visibility', 'visible');
+	$("#modalWindow").css('background-color', 'rgba(0,0,0,0)');
+	$("#modalWindow").css('visibility', 'visible');	
+}
+
+var bCaliMode = false;
+function calibrationWindow() {
+	if (bCurrRecord) return;  // 녹화중 팝업 안띄움
+
+	$("#settingWindow").css('visibility', 'hidden');
+	
+	bCaliMode = true;
+	CaliCamera = getCurrCamera();
+	$("#calibration").css('visibility', 'visible');
+	$("#modalWindow").css('background-color', 'rgba(0,0,0,0)');
+	$("#modalWindow").css('visibility', 'visible');	
+}
+
+function messageWindow(msg) {
+	$("#msg").text(msg);
+	$("#messageWindow").css('visibility', 'visible');
+	$("#modalWindow").css('background-color', 'rgba(0,0,0,0)');
+	$("#modalWindow").css('visibility', 'visible');	
+	setTimeout("closeMessageWindow()",2000);
+}
+
+function stopPreview() {
+  	var currCamera = getCurrCamera();
+  	var port = 0;
+  	if (currCamera === "VISION") {
+  		port = 5431;
+  	} else if (currCamera === "THERMAL") {
+  		port = 5432;
+  	} else if (currCamera === "UV") {
+  		port = 5433;
+  	}
+	if (port > 0) {
+		$.ajax({
+		    type: 'GET',
+		    url:"http://127.0.0.1:"+port+"/stop", 
+		    cache:false,
+		    async:true,
+		    complete:function(data) {
+		    }, 
+		    error:function(request, status, error) {
+		    }
+		});
+	}
+}
+
+function startPreview() {
+  	var currCamera = getCurrCamera();
+  	var port = 0;
+  	if (currCamera === "VISION") {
+  		port = 5431;
+  	} else if (currCamera === "THERMAL") {
+  		port = 5432;
+  	} else if (currCamera === "UV") {
+  		port = 5433;
+  	}
+	if (port > 0) {
+		$.ajax({
+		    type: 'GET',
+		    url:"http://127.0.0.1:"+port+"/start", 
+		    cache:false,
+		    async:true,
+		    complete:function(data) {
+		    }, 
+		    error:function(request, status, error) {
+		    }
+		});
+	}
+}
+
+function saveCalibrationWindow() {
+	bCaliMode = false;
+
+	if (CaliCamera === "THERMAL") {
+		x = $("#main_thermal").offset().left;
+		y = $("#main_thermal").offset().top;
+		thermalX = x;
+		thermalY = y;
+	} else if (CaliCamera === "VISION") {
+		x = $("#main_video").offset().left;
+		y = $("#main_video").offset().top;
+		visionX = x;
+		visionY = y;
+	} else if (CaliCamera === "UV") {
+		x = $("#main_video").offset().left;
+		y = $("#main_video").offset().top;
+		uvX = x;
+		uvY = y;
+	}
+	$.ajax({
+	    type: 'GET',
+	    url:"/saveCalibration?cam="+CaliCamera+"&x="+x+"&y="+y, 
+	    cache:false,
+	    async:true,
+	    complete:function(data) {
+	    }, 
+	    error:function(request, status, error) {
+	    }
+	});
+	CaliCamera = "";
+	$("#modalWindow").css('visibility', 'hidden');
+	$("#calibration").css('visibility', 'hidden');
+}
+
+function fileWindow() {
+	if (bCurrRecord) return;  // 녹화중 팝업 안띄움
+	$.ajax({
+	    type: 'GET',
+	    url:"/getFileList", 
+	    cache:false,
+	    async:true,
+	    complete:function(data) {
+	    	showFileWindow(data.responseText);
+	    }, 
+	    error:function(request, status, error) {
+	    }
+	});
+}
+
+function trClicked(e, tt) {
+	if ($(e.target).is('input:checkbox')) return;
+	$(tt).find("input:checkbox").eq(0).click();
+}
+
+function showFileWindow(fileList) {
+	if (bCurrRecord) return;  // 녹화중 팝업 안띄움
+
+	$("#transfer").html("");
+	var strTable = "";
+	if (fileList == "ERROR") {
+		strTable = "<tr><td colspan=4>ERROR</td></tr>";
+	} else {
+		$("input[name=file_all]").prop("checked", false);
+		var arrFileList = fileList.split("\n");
+		if (arrFileList.length == 0) {
+			strTable = "<tr><td colspan=4>NO FILE</td></tr>";
+		} else {
+			for (var i=0; i<arrFileList.length; i++) {
+				var fileinfo = arrFileList[i].split("\t");
+				if (fileinfo[0] != "") {
+					strTable += "<tr onclick='trClicked(event, this)'><td><input type=\"checkbox\" name=\"fileid\" value=\""+fileinfo[0]+"\"></td><td>"+fileinfo[0]+"</td><td>"+fileinfo[2]+"</td><td>"+fileinfo[1]+"</td></tr>\n";
+				}
+			}
+		}
+	}
+
+	$("#fileWindow table tbody").html(strTable);
+
+	$("#fileWindow").css('visibility', 'visible');
+	$("#modalWindow").css('background-color', 'rgba(0,0,0,0.8)');
+	$("#modalWindow").css('visibility', 'visible');	
+}
+
+function check_all(name) {
+	if ($("input[name=file_all]").is(":checked")) {
+		$("input[name="+name+"]").prop("checked",true);
+	} else {
+		$("input[name="+name+"]").prop("checked",false);
+	}
+}
+
+function copyFileUSB() {
+	var strIDList = "";
+	$('input:checkbox[name="fileid"]').each(function() {
+	    if(this.checked) {
+			strIDList += this.value + ",";
+    	}
+	});
+	if (strIDList != "") {
+		$.ajax({
+		    type: 'GET',
+		    url:"/fileCopy?filelist="+strIDList, 
+		    cache:false,
+		    async:true,
+		    complete:function(data) {
+		    	if (data.responseText.indexOf("NO USB")>=0) {
+			    	messageWindow("오류 : USB를 확인하세요.");
+		    	} else if (data.responseText.indexOf("OK")>=0) {
+		    		messageWindow("복사가 완료되었습니다.");
+		    	}
+		    }, 
+		    error:function(request, status, error) {
+		    }
+		});
+	}
+}
+
+function deleteFile() {
+	var strIDList = "";
+	$('input:checkbox[name="fileid"]').each(function() {
+	    if(this.checked) {
+			strIDList += this.value + ",";
+    	}
+	});
+	if (strIDList != "") {
+		$.ajax({
+		    type: 'GET',
+		    url:"/fileDelete?filelist="+strIDList, 
+		    cache:false,
+		    async:true,
+		    complete:function(data) {
+		    	fileWindow();
+		    }, 
+		    error:function(request, status, error) {
+		    }
+		});
+	}
+}
+
+function closeFileWindow() {
+	$.ajax({
+	    type: 'GET',
+	    url:"/fileMode?mode=STOP", 
+	    cache:false,
+	    async:true,
+	    complete:function(data) {
+	    }, 
+	    error:function(request, status, error) {
+	    }
+	});
+	$("#modalWindow").css('visibility', 'hidden');
+	$("#fileWindow").css('visibility', 'hidden');
+}
+
+function closeWindow() {
+	$("#modalWindow").css('visibility', 'hidden');
+	$("#settingWindow").css('visibility', 'hidden');
+	$("#messageWindow").css('visibility', 'hidden');
+}
+
+function closeMessageWindow() {
+	if ($("#messageWindow").css('visibility') === "visible") {
+		$("#modalWindow").css('visibility', 'hidden');
+		$("#settingWindow").css('visibility', 'hidden');
+		$("#messageWindow").css('visibility', 'hidden');
+	}
+}
+
+var currShift = <%-global.config.get("audio.shift")%>;
+var shiftMode = "";
+
+function changeShift() {
+	if (currShift == 10) {
+		currShift = 1;
+	} else if (currShift == 1) {
+		currShift = 6;
+	} else if (currShift == 6) {
+		currShift = 10;
+	} else {
+		currShift = 10;
+	}
+	setShift();
+}
+
+function setShift() {
+	if (currShift == 1) {
+		shiftMode = "mode_audible.png";
+	} else if (currShift == 6) {
+		shiftMode = "mode_gas.png";
+	} else {
+		currShift = 10;
+		shiftMode = "mode_elec.png";
+	}
+	$("div.mode img").attr("src", "/images/"+shiftMode);
+	$.ajax({
+	    type: 'GET',
+	    url:"/setShift?shift="+currShift, 
+	    cache:false,
+	    async:true,
+	    complete:function(data) {
+	    }, 
+	    error:function(request, status, error) {
+	    }
+	});
+}
+
+function updateTempRange() {
+	if (currTempRange == 1) {
+		$("#min_temp").text("10℃");
+		$("#mid_temp").text("20℃");
+		$("#max_temp").text("30℃");
+		$("#min_btn").text("10℃");
+		$("#max_btn").text("30℃");
+	} else if (currTempRange == 2) {
+		$("#min_temp").text("10℃");
+		$("#mid_temp").text("30℃");
+		$("#max_temp").text("50℃");
+		$("#min_btn").text("10℃");
+		$("#max_btn").text("50℃");
+	} else if (currTempRange == 3) {
+		$("#min_temp").text("0℃");
+		$("#mid_temp").text("50℃");
+		$("#max_temp").text("100℃");
+		$("#min_btn").text("0℃");
+		$("#max_btn").text("100℃");
+	} else if (currTempRange == 4) {
+		$("#min_temp").text("-10℃");
+		$("#mid_temp").text("45℃");
+		$("#max_temp").text("100℃");
+		$("#min_btn").text("-10℃");
+		$("#max_btn").text("100℃");
+	} else if (currTempRange == 5) {
+		$("#min_temp").text("0℃");
+		$("#mid_temp").text("300℃");
+		$("#max_temp").text("600℃");
+		$("#min_btn").text("0℃");
+		$("#max_btn").text("600℃");
+	}
+}
+
+function changeTempRange() {
+	currTempRange ++;
+	
+	if (currTempRange > 5) {
+		currTempRange = 1;
+	}
+	var url = "";
+	if (currTempRange == 1) {
+		url = "http://localhost:3452/range?curr="+currTempRange+"&min=10&max=30";
+	} else if (currTempRange == 2) {
+		url = "http://localhost:3452/range?curr="+currTempRange+"&min=10&max=50";
+	} else if (currTempRange == 3) {
+		url = "http://localhost:3452/range?curr="+currTempRange+"&min=0&max=100";
+	} else if (currTempRange == 4) {
+		url = "http://localhost:3452/range?curr="+currTempRange+"&min=-10&max=100";
+	} else if (currTempRange == 5) {
+		url = "http://localhost:3452/range?curr="+currTempRange+"&min=0&max=600";
+	}
+	$.ajax({
+	    type: 'GET',
+	    url:url, 
+	    cache:false,
+	    async:true,
+	    complete:function(data) {
+			updateTempRange();
+	    }, 
+	    error:function(request, status, error) {
+	    }
+	});
+}
+</script>
+</head>
+<body onselectstart='return false'>
+    <div id="leftmenu">
+        <h2 id="lbl_date">2024-11-06</h2><h1 id="lbl_time">14:30:00</h1>
+        <div class="up_circle" id="menu_file" onclick="fileWindow();"><br /><span class="icon icon-file-text2"></span></div>
+        <div class="up_circle" onclick="settingWindow();"><br /><span class="icon icon-cog"></span></div>
+        
+        <div class="mode" onclick="changeShift();"><img src="/images/mode_elec.png" width=55px style="margin-top:3px;"/></div>
+    </div>
+    <div id="videoarea">
+        <img id="main_video" src="" />
+        <img id="main_thermal" src="http://localhost:5432/thermal?stream=FALSE" />
+        <img id="main_uv" src="http://localhost:5433/uv?stream=FALSE" />
+    </div>
+    <div id="rightinfo">
+        <div id="decibel">
+            <div class="down_label"><span>Sound Level</span></div>
+            <div class="info_value"><span>12<small>.2dB</small></span><br/><div class="info_sub"><span>@12.5kHz</span></div></div>
+        </div>
+        <div id="temperature">
+            <div class="down_label"><span>Temperature</span></div>
+            <div class="info_value"><span>20<small>.1℃</small></span><br/><div class="info_sub"><span>18.0℃ &nbsp; 22.3℃</span></div></div>
+        </div>
+        <div id="distance">
+            <div class="down_label"><span>Distance</span></div>
+            <div class="info_value"><span>3<small>.12m</small></span></div>
+        </div>
+        <div id="camera1" class="up_btn camera_btn" onclick="camInit(0);">
+          <span>Vision Camera</span>
+        </div>
+        <div id="camera2" class="up_btn camera_btn" onclick="camInit(1);">
+          <span>Thermal Camera</span>
+        </div>
+        <div id="camera3" class="up_btn camera_btn" onclick="camInit(2);">
+          <span>UV Camera</span>
+        </div>
+    </div>
+    <div id="spectrogram">
+      <div id="leftBlur"></div>
+      <div id="rightBlur"></div>
+      <canvas id="colorPlot"></canvas>
+    </div>
+    <div class="spot"><img src='./images/spot.png'/></div>
+    <img id='cross' src='./images/cross.png' />
+    <div id='recording'>
+    	<span class="blink">●</span> <span id='rec_time'>00:00:00</span>
+    </div>
+    <div id='colormap' onclick="changePalette();">
+    	<span id='min_temp'>10℃</span><span id='mid_temp'>30℃</span><span id='max_temp'>50℃</span>
+    	<img src='./images/colormap/04.png'>
+    </div>
+    <div id="modalWindow">
+		<div id="fileWindow">
+			<h2>FILE LIST <small id="transfer"></small></h2>
+			<div id="file_scroll">
+				<table class="tbl-grid">
+					<colgroup><col width="15%"/><col width="35%"/><col width="25%"/><col width="25%"/></colgroup>
+					<thead>
+						<tr onclick="trClicked(event, this)"><th>선택 &nbsp;<input type="checkbox" name="file_all" onclick="check_all('fileid');"></th><th>파일명</th><th>유형</th><th>크기</th></tr>
+					</thead>
+					<tbody>
+						<tr><td><input type="checkbox" name="fileid" value="20250123_040646"></td><td>20260123_040646</td><td>동영상</td><td>-</td></tr>
+						<tr><td><input type="checkbox" name="fileid" value="20250123_050232"></td><td>20250123_050232</td><td>이미지</td><td>-</td></tr>
+						<tr><td><input type="checkbox" name="fileid" value="20250123_030405"></td><td>20250123_030405</td><td>이미지</td><td>-</td></tr>
+						<tr><td><input type="checkbox" name="fileid" value="20250123_230405"></td><td>20250123_230405</td><td>이미지</td><td>-</td></tr>
+						<tr><td><input type="checkbox" name="fileid" value="20250124_001023"></td><td>20250124_001023</td><td>동영상</td><td>-</td></tr>
+					</tbody>
+				</table>
+			</div>
+			
+		    <div class="winButton" id="delete_btn" onclick="deleteFile();">
+		      <span>삭제</span>
+		    </div>		
+		    <div class="winButton" id="copy_btn" onclick="copyFileUSB();">
+		      <span>USB로 복사</span>
+		    </div>		
+		    <div class="winButton" id="ok_btn" onclick="closeFileWindow();">
+		      <span>닫기</span>
+		    </div>		
+		</div>
+		<div id="settingWindow">
+			<h2>SETTING</h2>
+	        <div class="settingMenu up_btn" id="btnCameraCali" onclick="calibrationWindow();">
+	        	<img src="images/align.png">
+	            <div><span style="color:#c0c0c0;">Camera Calibration</span></div>
+	        </div>
+	        <div class="settingMenu up_btn" id="btnDateTime">
+	        	<img src="images/datetime.png">
+	            <div><span style="color:#c0c0c0;">Date/Time Setting</span></div>
+	        </div>
+	        <div class="settingMenu up_btn" id="btnTempRange" onclick="changeTempRange()">
+	            <span class="btn_temp" id="max_btn">-20℃</span>
+	            <span class="btn_temp" id="min_btn">150℃</span>
+	        	<img src="images/temp_range.png">
+	            <div><span style="color:#c0c0c0;">Temp. Range</span></div>
+	        </div>
+	
+		    <div class="winButton" id="ok_btn2" onclick="closeWindow();">
+		      <span>닫기</span>
+		    </div>		
+		</div>
+		<div id="messageWindow">
+			<h2>알 림</h2>
+			<div id="msg"></div>
+		    <div class="winButton" id="ok_btn4" onclick="closeMessageWindow();">
+		      <span>닫기</span>
+		    </div>		
+		</div>
+		<div id="calibration">
+			<h3>Sensor Calibration</h3>
+			<div id="message">3미터 거리의 대상이 화면 가운데에 오도록 상하좌우 버튼으로 조정한 뒤 저장 버튼을 누르세요</div>
+		    <div class="winButton" id="ok_btn3" onclick="saveCalibrationWindow();">
+		      <span>저장</span>
+		    </div>		
+		</div>
+	</div>
+	<canvas id="snapshot"></canvas>
+
+
+
+
+<script>
+
+$("body").mousedown(function(e) {
+  if ($("#modalWindow").css('visibility') == "visible") {
+  } else {
+	  if (e.pageX > 85 && e.pageX < 680) {
+	    if (e.pageY > 400) {
+	      band = parseInt(parseFloat(e.pageX - 85) / canvWidth * 480) / 10.0;
+	      if (band < 0.5) {
+	        band = 0.5;
+	      } else {
+	        if (band > 48.0) {
+	          band = 48.0;
+	        }       
+	      }
+	    } else {
+	      band = 0.0;
+	    }
+	    setBand();
+	    console.log("Band="+band+"kHz");
+	    return false;
+	  }
+	}  
+});
+
+$(function() {
+	mainInit();    
+});
+
+</script>
+
+<svg style="visibility: hidden; position: absolute;" width="0" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1">
+    <defs>
+    <filter id="inset-shadow-button">
+        <feGaussianBlur stdDeviation="3" in="SourceGraphic" result="offset-blur"/>                           <!-- Shadow Blur -->
+        <feComposite operator="out" in="SourceGraphic" in2="offset-blur" result="inverse"/> <!-- Invert the drop shadow to create an inner shadow -->
+        <feFlood flood-color="black" flood-opacity="0.4" result="color"/>                     <!-- Color & Opacity -->
+        <feComposite operator="in" in="color" in2="inverse" result="shadow"/>               <!-- Clip color inside shadow -->
+        <feComponentTransfer in="shadow" result="shadow">                                   <!-- Shadow Opacity -->
+            <feFuncA type="linear" slope=".9"/>
+        </feComponentTransfer>
+        <feComposite operator="over" in="shadow" in2="SourceGraphic"/>               <!-- Clip color inside shadow -->
+    </filter>           
+    </defs>
+</svg>
+</body>
+</html>

@@ -166,3 +166,15 @@ input {
 .font-digital7 {
   font-family: "Digital-7", monospace;
 }
+
+.modal-overlay {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(37, 37, 37, 0.76);
+  position: absolute;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
