@@ -1,5 +1,5 @@
-export default function Modal({ openFileList, children }) {
-  if (!openFileList) return null;
+export default function Modal({ modalOpen, children }) {
+  if (!modalOpen) return null;
 
   return <div className="modal-overlay">{children}</div>;
 }

@@ -93,9 +93,7 @@ export default function FileList({ onClose }) {
           </tbody>
         </table>
         {currentSrc && (
-          <div>
-            <img src={currentSrc} alt="" />
-          </div>
+          <img className="modalThumbnail" src={currentSrc} alt="" />
         )}
       </div>
       <div className="winBtnBox">

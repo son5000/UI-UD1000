@@ -8,7 +8,7 @@ import WarningOutline from "./main/WarningOutline";
 import ValueList from "./main/ValueList";
 
 export default function Main() {
-  const [currentdB, setCurrentdB] = useState(0);
+  const [currentdB, setCurrentdB] = useState(10);
   const [popupOpen, setPopupOpen] = useState(true);
 
   useEffect(() => {

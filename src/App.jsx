@@ -5,22 +5,32 @@ import Thumbnail from "./components/main/Thumbnail";
 import Modal from "./components/sub/Modal";
 import FileList from "./components/sub/FileList";
 import Main from "./components/Main";
+import Setting from "../src/components/sub/Setting";
 
 function App() {
-  const [openFileList, setOpenFileList] = useState(false);
+  const [modalOpen, setModalopen] = useState(null);
 
   return (
     <div className="App">
       <div className="container">
         <div className="systemPanel">
-          <img src="/images/setting.png" alt="" />
+          <img
+            onClick={() => setModalopen("setting")}
+            src="/images/setting.png"
+            alt=""
+          />
           <Clock />
           <img src="/images/와이파이배터리.png" alt="" />
         </div>
         <Main />
-        <Thumbnail onClick={() => setOpenFileList(true)} />
-        <Modal openFileList={openFileList}>
-          <FileList onClose={() => setOpenFileList(false)} />
+        <Thumbnail onClick={() => setModalopen("fileList")} />
+        <Modal modalOpen={modalOpen}>
+          {modalOpen === "fileList" && (
+            <FileList onClose={() => setModalopen(null)} />
+          )}
+          {modalOpen === "setting" && (
+            <Setting onClose={() => setModalopen(null)} />
+          )}
         </Modal>
       </div>
     </div>

@@ -13,13 +13,14 @@ export default function ArcSlider({ currentdB, width = 150, height = 150 }) {
       max: 30, // 최대값
       step: 1, // 값 증가 단위
       initialValue: currentdB, // 초기값 (현재 dB)
-      // valueColor:
-      //   currentdB > 19
-      //     ? "	rgba(255, 0, 55, 0.95)" // 위험 - 빨강
-      //     : currentdB > 9
-      //     ? "rgba(253, 242, 0, 0.95)" // 주의 - 주황
-      //     : "	rgba(57, 255, 20, 0.9)", // 정상 - 하늘색
-      valueColor: "rgba(0,255,230,1)",
+      valueColor: "#2dd9fe",
+      glowColor: "#00a3d5",
+      // valueColor: "#FF53cd",
+      // glowColor: "#e10361",
+      // valueColor: "#FF5161",
+      // glowColor: "#D30302",
+      // valueColor: "#9461fd",
+      // glowColor: "#4003e6",
       arcBgFractionColor: "rgba(0, 0, 0, 0.2)", // 배경 게이지 색상
       // ✅ 게이지 모양 설정
       backgroundAngle: 270, // 배경 아크 각도
@@ -35,7 +36,8 @@ export default function ArcSlider({ currentdB, width = 150, height = 150 }) {
       max: 50,
       step: 1,
       initialValue: (currentdB / 270) * 90,
-      valueColor: "rgba(0,255,230,1)",
+      valueColor: "#00fe9b",
+      glowColor: "#168534",
       arcBgFractionColor: "rgba(0, 0, 0, 0.3)",
       backgroundAngle: 90,
       arcFractionSpacingRatio: 0.7,
@@ -49,9 +51,9 @@ export default function ArcSlider({ currentdB, width = 150, height = 150 }) {
       min: 0,
       max: 30,
       step: 1,
-      initialValue: currentdB,
-      handleFillColor: "rgba(253, 242, 0, 1)", // 핸들 내부 색
-      strokeColor: "rgba(0, 0, 0, 0.2)", //보더
+      initialValue: currentdB - 3,
+      handleFillColor: "#ffdb4e", // 핸들 내부 색
+      strokeColor: "#b48505", //보더
       strokeThickness: 1,
       arcBgFractionColor: "",
       displayName: "Max",
@@ -114,6 +116,126 @@ export default function ArcSlider({ currentdB, width = 150, height = 150 }) {
     svg.setAttribute("height", height); // SVG 높이 설정
     containerRef.current.appendChild(svg); // container에 SVG 삽입
 
+    // const addGlowFilter = (svg) => {
+    //   if (svg.querySelector("#glow")) return;
+    //   const ns = "http://www.w3.org/2000/svg";
+    //   const defs = document.createElementNS(ns, "defs");
+    //   const filter = document.createElementNS(ns, "filter");
+    //   filter.setAttribute("id", "glow");
+    //   filter.setAttribute("x", "-50%");
+    //   filter.setAttribute("y", "-50%");
+    //   filter.setAttribute("width", "200%");
+    //   filter.setAttribute("height", "200%");
+    //   filter.setAttribute("filterUnits", "userSpaceOnUse");
+
+    //   const gaussianBlur = document.createElementNS(ns, "feGaussianBlur");
+    //   gaussianBlur.setAttribute("stdDeviation", "2"); // 블러가 퍼지는 정도
+    //   gaussianBlur.setAttribute("result", "blur");
+
+    //   const colorMatrix = document.createElementNS(ns, "feColorMatrix");
+    //   colorMatrix.setAttribute("in", "blur");
+    //   colorMatrix.setAttribute("type", "matrix");
+    //   colorMatrix.setAttribute(
+    //     "values",
+    //     `1 0 0 0 0
+    //      0 1 0 0 0
+    //      0 0 1 0 0
+    //      0 0 0 1.3 0` // 블러 강도 조절
+    //   );
+    //   colorMatrix.setAttribute("result", "coloredBlur");
+
+    //   const merge = document.createElementNS(ns, "feMerge");
+    //   const mergeNode1 = document.createElementNS(ns, "feMergeNode");
+    //   mergeNode1.setAttribute("in", "coloredBlur"); // 강조된 blur
+    //   const mergeNode2 = document.createElementNS(ns, "feMergeNode");
+    //   mergeNode2.setAttribute("in", "SourceGraphic"); // 원본 그래픽
+
+    //   merge.appendChild(mergeNode1);
+    //   merge.appendChild(mergeNode2);
+
+    //   filter.appendChild(gaussianBlur);
+    //   filter.appendChild(colorMatrix);
+    //   filter.appendChild(merge);
+    //   defs.appendChild(filter);
+    //   svg.appendChild(defs);
+    // };
+
+    // addGlowFilter(svg); // 반드시 drawArc, drawHandle 전에!
+
+    // arc를 실제 SVG에 그리는 함수
+
+    const addGlowFilter = (
+      svg,
+      id,
+      color = "#0ff",
+      alphaStrength = 2,
+      blurAmount = 1.5
+    ) => {
+      if (svg.querySelector(`#${id}`)) return;
+
+      const ns = "http://www.w3.org/2000/svg";
+      const defs =
+        svg.querySelector("defs") || document.createElementNS(ns, "defs");
+      if (!svg.contains(defs)) svg.appendChild(defs);
+
+      const filter = document.createElementNS(ns, "filter");
+      filter.setAttribute("id", id);
+      filter.setAttribute("x", "-50%");
+      filter.setAttribute("y", "-50%");
+      filter.setAttribute("width", "200%");
+      filter.setAttribute("height", "200%");
+      filter.setAttribute("filterUnits", "userSpaceOnUse");
+
+      // 1️⃣ 블러 생성
+      const gaussianBlur = document.createElementNS(ns, "feGaussianBlur");
+      gaussianBlur.setAttribute("in", "SourceGraphic");
+      gaussianBlur.setAttribute("stdDeviation", blurAmount); // ✅ 퍼짐 정도
+      gaussianBlur.setAttribute("result", "blur");
+
+      // 2️⃣ 알파 세기를 증폭시키는 colorMatrix
+      const colorMatrix = document.createElementNS(ns, "feColorMatrix");
+      colorMatrix.setAttribute("in", "blur");
+      colorMatrix.setAttribute("type", "matrix");
+      colorMatrix.setAttribute(
+        "values",
+        `1 0 0 0 0
+     0 1 0 0 0
+     0 0 1 0 0
+     0 0 0 ${alphaStrength} 0` // ✅ 알파(세기) 조절
+      );
+      colorMatrix.setAttribute("result", "strongBlur");
+
+      // 3️⃣ 색상 입히기
+      const flood = document.createElementNS(ns, "feFlood");
+      flood.setAttribute("flood-color", color);
+      flood.setAttribute("flood-opacity", "1");
+      flood.setAttribute("result", "flood");
+
+      const composite = document.createElementNS(ns, "feComposite");
+      composite.setAttribute("in", "flood");
+      composite.setAttribute("in2", "strongBlur");
+      composite.setAttribute("operator", "in");
+      composite.setAttribute("result", "coloredGlow");
+
+      // 4️⃣ 원본 + glow 병합
+      const merge = document.createElementNS(ns, "feMerge");
+      const mergeNode1 = document.createElementNS(ns, "feMergeNode");
+      mergeNode1.setAttribute("in", "coloredGlow");
+      const mergeNode2 = document.createElementNS(ns, "feMergeNode");
+      mergeNode2.setAttribute("in", "SourceGraphic");
+
+      merge.appendChild(mergeNode1);
+      merge.appendChild(mergeNode2);
+
+      // 필터 구성
+      filter.appendChild(gaussianBlur);
+      filter.appendChild(colorMatrix);
+      filter.appendChild(flood);
+      filter.appendChild(composite);
+      filter.appendChild(merge);
+      defs.appendChild(filter);
+    };
+
     // 각 슬라이더 데이터 순회하며 렌더링
     sliders.forEach((slider, i) => {
       // 슬라이더 속성 분해 및 기본값 지정
@@ -129,55 +251,9 @@ export default function ArcSlider({ currentdB, width = 150, height = 150 }) {
         arcFractionLength, // 조각 가로 길이
         arcFractionThickness, // 조각 세로 길이
         arcBgFractionColor, // 아크 배경 색
+        glowColor,
       } = slider;
 
-      const addGlowFilter = (svg) => {
-        if (svg.querySelector("#glow")) return;
-        const ns = "http://www.w3.org/2000/svg";
-        const defs = document.createElementNS(ns, "defs");
-        const filter = document.createElementNS(ns, "filter");
-        filter.setAttribute("id", "glow");
-        filter.setAttribute("x", "-50%");
-        filter.setAttribute("y", "-50%");
-        filter.setAttribute("width", "200%");
-        filter.setAttribute("height", "200%");
-        filter.setAttribute("filterUnits", "userSpaceOnUse");
-
-        const gaussianBlur = document.createElementNS(ns, "feGaussianBlur");
-        gaussianBlur.setAttribute("stdDeviation", "2"); // 블러가 퍼지는 정도
-        gaussianBlur.setAttribute("result", "blur");
-
-        const colorMatrix = document.createElementNS(ns, "feColorMatrix");
-        colorMatrix.setAttribute("in", "blur");
-        colorMatrix.setAttribute("type", "matrix");
-        colorMatrix.setAttribute(
-          "values",
-          `1 0 0 0 0
-           0 1 0 0 0
-           0 0 1 0 0
-           0 0 0 1.3 0` // 블러 강도 조절
-        );
-        colorMatrix.setAttribute("result", "coloredBlur");
-
-        const merge = document.createElementNS(ns, "feMerge");
-        const mergeNode1 = document.createElementNS(ns, "feMergeNode");
-        mergeNode1.setAttribute("in", "coloredBlur"); // 강조된 blur
-        const mergeNode2 = document.createElementNS(ns, "feMergeNode");
-        mergeNode2.setAttribute("in", "SourceGraphic"); // 원본 그래픽
-
-        merge.appendChild(mergeNode1);
-        merge.appendChild(mergeNode2);
-
-        filter.appendChild(gaussianBlur);
-        filter.appendChild(colorMatrix);
-        filter.appendChild(merge);
-        defs.appendChild(filter);
-        svg.appendChild(defs);
-      };
-
-      addGlowFilter(svg); // 반드시 drawArc, drawHandle 전에!
-
-      // arc를 실제 SVG에 그리는 함수
       const drawArc = (
         svg,
         radius,
@@ -186,22 +262,25 @@ export default function ArcSlider({ currentdB, width = 150, height = 150 }) {
         spacingRatio = defaultArcFractionSpacingRatio,
         length = defaultArcFractionLength,
         thickness = defaultArcFractionThickness,
-        isGlow = true
+        isGlow = true,
+        glowColor
       ) => {
         const path = document.createElementNS(
           "http://www.w3.org/2000/svg",
           "path"
         );
         const spacing = calculateSpacing(radius * tau, length, spacingRatio);
+        const glowId = `glow-filter-${i}`;
+        if (isGlow) {
+          addGlowFilter(svg, glowId, glowColor); // 🔧 오류 수정: 함수 직접 호출
+          path.setAttribute("filter", `url(#${glowId})`); // ✅ path에 필터 적용
+        }
 
         path.setAttribute("d", describeArc(cx, cy, radius, 0, angle));
         path.setAttribute("fill", "none");
         path.setAttribute("stroke", valueColor);
         path.setAttribute("stroke-width", thickness);
         path.setAttribute("stroke-dasharray", `${length} ${spacing}`);
-        if (isGlow) {
-          path.setAttribute("filter", "url(#glow)");
-        }
         svg.appendChild(path);
       };
 
@@ -310,7 +389,8 @@ export default function ArcSlider({ currentdB, width = 150, height = 150 }) {
         arcFractionSpacingRatio,
         arcFractionLength,
         arcFractionThickness,
-        true
+        true,
+        glowColor
       );
 
       // Max 요소만 핸들표시 O
